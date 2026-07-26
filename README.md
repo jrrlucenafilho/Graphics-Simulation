@@ -32,14 +32,19 @@ Tema e funcionamento geral do programa
 ### Compilar
 
 ```bash
-g++ -o graphics_simulation main.cpp -lGL -lGLU -lglut
+g++ -o stl_viewer main.cpp -lGL -lGLU -lglut
 ```
 
 ### Executar
 
 ```bash
-./graphics_simulation
+./stl_viewer                  # sem modelo (teapot placeholder)
+./stl_viewer modelo.stl       # carregar modelo direto da linha de comando
 ```
+
+Use o botão **Importar** (ou tecla `I`) para selecionar um arquivo STL.  
+Use o botão **Exportar** (ou tecla `E`) para salvar o modelo carregado.  
+Arraste o mouse para rotacionar, scroll para zoom, tecla `R` para resetar a visualização e `ESC` para sair.
 
 ---
 
@@ -56,11 +61,6 @@ Liste aqui os principais desafios enfrentados durante o desenvolvimento, como:
 
 ## O que pode ser melhorado (e como melhorar)
 
-Descreva possíveis melhorias futuras, como:
-- Adicionar texturas mais realistas;
-- Implementar shaders com OpenGL 3.3+;
-- Otimizar a renderização;
-- Adicionar mais funcionalidades (colisão, som, física, etc.);
 - Melhorar a interface do usuário.
 
 ---
@@ -69,13 +69,11 @@ Descreva possíveis melhorias futuras, como:
 
 Descreva quais elementos de cada atividade prática da disciplina foram incorporados no projeto:
 
-- **Atividade Prática 1 — ?**: ?
-- **Atividade Prática 2 — ?**: ?
-- **Atividade Prática 3 — ?**: ?
-- **Atividade Prática 4 — ?**: ?
-- **Atividade Prática 5 — ?**: ?
-
-(Preencher com os tópicos de cada AP e como foram aplicados no projeto.)
+- Atividade Prática 2: Movimentação de objetos e uso da pilha
+- Atividade Prática 3: Uso correto de Oclusão
+- Atividade Prática 4: Fontes de luz com comportamento correto
+- Atividade Prática 5: Utilização de imagens como texturas
+- Atividade Prática 6: Utilização de Curvas de Bèzier
 
 ---
 
@@ -83,6 +81,6 @@ Descreva quais elementos de cada atividade prática da disciplina foram incorpor
 
 | Integrante | Contribuições |
 |---|---|
-| Nome 1 | |
-| Nome 2 | |
-| Nome 3 | |
+| José Ricardo Rodrigues | |
+| Ana Vitória | |
+| Leomax | |
