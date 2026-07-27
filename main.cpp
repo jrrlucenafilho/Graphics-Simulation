@@ -55,6 +55,7 @@ struct Vec2 {
 struct Triangle {
   Vec3 normal, v[3];
   Vec2 uv[3];
+  Vec3 color;
 };
 
 static std::vector<Triangle> g_triangles;
@@ -74,6 +75,12 @@ static bool g_texture_hover = false;
 
 static GLuint g_texture_id = 0;
 static bool g_texture_loaded = false;
+
+static bool g_paint_mode = false;
+static bool g_show_palette = false;
+static Vec3 g_selected_color(1.0f, 0.0f, 0.0f);
+static bool g_paint_hover = false;
+static bool g_has_painted_faces = false;
 
 // ---- STL loader ----
 
@@ -196,8 +203,10 @@ static bool load_stl(const std::string &path) {
         n.normalize();
         g_triangles[i].normal = n;
       }
+      g_triangles[i].color = Vec3(1.0f, 1.0f, 1.0f);
     }
     g_model_loaded = true;
+    g_has_painted_faces = false;
   }
   return ok;
 }
@@ -431,10 +440,10 @@ static void draw_info_text() {
   glColor3f(0.8f, 0.8f, 0.8f);
   char buf[256];
   if (g_model_loaded) {
-    snprintf(
-        buf, sizeof(buf),
-        "Triangulos: %zu | Arraste: rotacao | Scroll: zoom | R: rotacao auto",
-        g_triangles.size());
+    snprintf(buf, sizeof(buf),
+             "Triangulos: %zu | Arraste: rotacao | Scroll: zoom | R: rotacao "
+             "auto | P: pintar",
+             g_triangles.size());
   } else {
     snprintf(buf, sizeof(buf), "Nenhum modelo carregado. Clique em Importar.");
   }
@@ -579,6 +588,169 @@ static void draw_grid_floor() {
   }
 }
 
+static void draw_lamp(const Vec3 &pos) {
+  glPushMatrix();
+  glTranslatef(pos.x, pos.y, pos.z);
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+
+  // Wireframe lamp shade (cone: base at origin, apex at +z)
+  glColor3f(0.5f, 0.5f, 0.5f);
+  glutWireCone(0.3f, 0.4f, 16, 4);
+
+  // Wireframe bulb at the base of the shade
+  glColor3f(0.7f, 0.7f, 0.7f);
+  glTranslatef(0.0f, 0.0f, -0.02f);
+  glutWireSphere(0.12f, 10, 6);
+
+  glPopMatrix();
+}
+
+static void draw_palette() {
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, g_win_w, g_win_h, 0, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  int ss = 50, sp = 20;
+  int total_w = 3 * ss + 2 * sp;
+  int start_x = (g_win_w - total_w) / 2;
+  int y = 100;
+
+  // Panel background
+  glColor3f(0.1f, 0.1f, 0.2f);
+  glBegin(GL_QUADS);
+  glVertex2i(start_x - 10, y - 5);
+  glVertex2i(start_x + total_w + 10, y - 5);
+  glVertex2i(start_x + total_w + 10, y + 20 + ss + 5);
+  glVertex2i(start_x - 10, y + 20 + ss + 5);
+  glEnd();
+
+  // Border
+  glColor3f(0.5f, 0.5f, 0.5f);
+  glBegin(GL_LINE_LOOP);
+  glVertex2i(start_x - 10, y - 5);
+  glVertex2i(start_x + total_w + 10, y - 5);
+  glVertex2i(start_x + total_w + 10, y + 20 + ss + 5);
+  glVertex2i(start_x - 10, y + 20 + ss + 5);
+  glEnd();
+
+  // Label
+  glColor3f(1, 1, 1);
+  glWindowPos2i(start_x, g_win_h - y);
+  const char *label = "Pintar:";
+  for (const char *c = label; *c; c++)
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *c);
+
+  // Red square
+  glColor3f(1, 0, 0);
+  glBegin(GL_QUADS);
+  glVertex2i(start_x, y + 15);
+  glVertex2i(start_x + ss, y + 15);
+  glVertex2i(start_x + ss, y + 15 + ss);
+  glVertex2i(start_x, y + 15 + ss);
+  glEnd();
+
+  // Green square
+  glColor3f(0, 1, 0);
+  glBegin(GL_QUADS);
+  glVertex2i(start_x + ss + sp, y + 15);
+  glVertex2i(start_x + 2 * ss + sp, y + 15);
+  glVertex2i(start_x + 2 * ss + sp, y + 15 + ss);
+  glVertex2i(start_x + ss + sp, y + 15 + ss);
+  glEnd();
+
+  // Blue square
+  glColor3f(0, 0, 1);
+  glBegin(GL_QUADS);
+  glVertex2i(start_x + 2 * ss + 2 * sp, y + 15);
+  glVertex2i(start_x + 3 * ss + 2 * sp, y + 15);
+  glVertex2i(start_x + 3 * ss + 2 * sp, y + 15 + ss);
+  glVertex2i(start_x + 2 * ss + 2 * sp, y + 15 + ss);
+  glEnd();
+
+  // Highlight the currently selected color
+  int sel_idx = (g_selected_color.x == 1.0f && g_selected_color.y == 0.0f) ? 0
+                : (g_selected_color.y == 1.0f)                             ? 1
+                                                                           : 2;
+  int hx = start_x + sel_idx * (ss + sp);
+  glColor3f(1, 1, 0);
+  glBegin(GL_LINE_LOOP);
+  glVertex2i(hx - 2, y + 13);
+  glVertex2i(hx + ss + 2, y + 13);
+  glVertex2i(hx + ss + 2, y + 15 + ss + 2);
+  glVertex2i(hx - 2, y + 15 + ss + 2);
+  glEnd();
+
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+
+  glEnable(GL_DEPTH_TEST);
+}
+
+// ---- mouse picking ----
+
+static bool ray_triangle_intersect(const Vec3 &orig, const Vec3 &dir,
+                                   const Triangle &tri, float &t) {
+  const float EPS = 1e-6f;
+  Vec3 e1 = tri.v[1] - tri.v[0];
+  Vec3 e2 = tri.v[2] - tri.v[0];
+  Vec3 pvec = dir.cross(e2);
+  float det = e1.dot(pvec);
+  if (std::abs(det) < EPS)
+    return false;
+  float inv_det = 1.0f / det;
+  Vec3 tvec = orig - tri.v[0];
+  float u = tvec.dot(pvec) * inv_det;
+  if (u < 0 || u > 1)
+    return false;
+  Vec3 qvec = tvec.cross(e1);
+  float v = dir.dot(qvec) * inv_det;
+  if (v < 0 || u + v > 1)
+    return false;
+  t = e2.dot(qvec) * inv_det;
+  return t > 0;
+}
+
+static int pick_triangle(int mx, int my) {
+  GLint viewport[4];
+  GLdouble mv[16], proj[16];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+  glGetDoublev(GL_PROJECTION_MATRIX, proj);
+
+  double nx, ny, nz, fx, fy, fz;
+  gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
+  gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
+
+  Vec3 orig(nx, ny, nz);
+  Vec3 dir(fx - nx, fy - ny, fz - nz);
+  dir.normalize();
+
+  float closest = 1e10f;
+  int hit = -1;
+  for (size_t i = 0; i < g_triangles.size(); i++) {
+    float t;
+    if (ray_triangle_intersect(orig, dir, g_triangles[i], t)) {
+      if (t < closest) {
+        closest = t;
+        hit = (int)i;
+      }
+    }
+  }
+  return hit;
+}
+
 static void render_scene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -596,13 +768,20 @@ static void render_scene() {
 
   draw_grid_floor();
 
+  // Draw wireframe lamps at light source positions
+  draw_lamp(Vec3(1.0f, 1.2f, 1.5f));
+  draw_lamp(Vec3(-1.0f, -0.5f, 2.5f));
+
+  if (g_show_palette)
+    draw_palette();
+
   if (g_model_loaded) {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
 
-    GLfloat light0_pos[] = {5.0f, 5.0f, 5.0f, 1.0f};
-    GLfloat light1_pos[] = {-5.0f, -3.0f, 2.0f, 1.0f};
+    GLfloat light0_pos[] = {1.0f, 1.2f, 1.5f, 1.0f};
+    GLfloat light1_pos[] = {-1.0f, -0.5f, 2.5f, 1.0f};
     GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat dim[] = {0.3f, 0.3f, 0.3f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
@@ -625,8 +804,16 @@ static void render_scene() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_spec);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shin);
 
+    if (g_has_painted_faces) {
+      glEnable(GL_COLOR_MATERIAL);
+      glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    }
+
     glBegin(GL_TRIANGLES);
     for (size_t i = 0; i < g_triangles.size(); i++) {
+      if (g_has_painted_faces)
+        glColor3f(g_triangles[i].color.x, g_triangles[i].color.y,
+                  g_triangles[i].color.z);
       glNormal3f(g_triangles[i].normal.x, g_triangles[i].normal.y,
                  g_triangles[i].normal.z);
       for (int j = 0; j < 3; j++) {
@@ -637,6 +824,8 @@ static void render_scene() {
       }
     }
     glEnd();
+    if (g_has_painted_faces)
+      glDisable(GL_COLOR_MATERIAL);
     if (g_texture_loaded)
       glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -653,6 +842,8 @@ static void render_scene() {
               g_auto_rot_enabled ? "Rotacao:ON" : "Rotacao:OFF",
               g_rotate_hover);
   draw_button(410, 50, 120, 35, "Textura", g_texture_hover);
+  draw_button(540, 50, 120, 35, g_paint_mode ? "Pintar:ON" : "Pintar",
+              g_paint_hover);
   draw_info_text();
 
   glutSwapBuffers();
@@ -682,14 +873,63 @@ static void mouse(int button, int state, int x, int y) {
   bool over_export = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
   bool over_rotate = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
   bool over_texture = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
+  bool over_paint = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+    if (over_paint) {
+      if (g_paint_mode || g_show_palette) {
+        g_paint_mode = false;
+        g_show_palette = false;
+      } else {
+        g_show_palette = true;
+      }
+      printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
+      glutPostRedisplay();
+      return;
+    }
+
+    // Color square clicks (only when palette is shown, no paint mode needed
+    // yet)
+    if (g_show_palette) {
+      int ss = 50, sp = 20;
+      int total_w = 3 * ss + 2 * sp;
+      int start_x = (g_win_w - total_w) / 2;
+      int pal_y = 100;
+      int sy = pal_y + 15;
+      if (y >= sy && y <= sy + ss) {
+        if (x >= start_x && x <= start_x + ss) {
+          g_selected_color = Vec3(1, 0, 0);
+          g_paint_mode = true;
+          printf("Cor selecionada: VERMELHO\n");
+          glutPostRedisplay();
+          return;
+        }
+        if (x >= start_x + ss + sp && x <= start_x + 2 * ss + sp) {
+          g_selected_color = Vec3(0, 1, 0);
+          g_paint_mode = true;
+          printf("Cor selecionada: VERDE\n");
+          glutPostRedisplay();
+          return;
+        }
+        if (x >= start_x + 2 * ss + 2 * sp && x <= start_x + 3 * ss + 2 * sp) {
+          g_selected_color = Vec3(0, 0, 1);
+          g_paint_mode = true;
+          printf("Cor selecionada: AZUL\n");
+          glutPostRedisplay();
+          return;
+        }
+      }
+    }
+
     if (over_import) {
       std::string path = open_file_dialog();
       if (!path.empty()) {
         if (load_stl(path)) {
           center_model();
           generate_uv_coords();
+          g_paint_mode = false;
+          g_show_palette = false;
+          g_has_painted_faces = false;
           printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                  g_triangles.size());
         } else {
@@ -732,6 +972,21 @@ static void mouse(int button, int state, int x, int y) {
       }
       return;
     }
+
+    // Paint on model
+    if (g_paint_mode && g_model_loaded) {
+      g_dragging = true;
+      g_last_mx = x;
+      g_last_my = y;
+      int idx = pick_triangle(x, y);
+      if (idx >= 0) {
+        g_triangles[idx].color = g_selected_color;
+        g_has_painted_faces = true;
+        glutPostRedisplay();
+      }
+      return;
+    }
+
     g_dragging = true;
     g_last_mx = x;
     g_last_my = y;
@@ -751,19 +1006,29 @@ static void mouse(int button, int state, int x, int y) {
 
 static void motion(int x, int y) {
   if (g_dragging) {
-    int dx = x - g_last_mx;
-    int dy = y - g_last_my;
-    g_rot_y += dx * 0.5f;
-    g_rot_x += dy * 0.5f;
-    g_last_mx = x;
-    g_last_my = y;
-    glutPostRedisplay();
+    if (g_paint_mode && g_model_loaded) {
+      int idx = pick_triangle(x, y);
+      if (idx >= 0) {
+        g_triangles[idx].color = g_selected_color;
+        g_has_painted_faces = true;
+        glutPostRedisplay();
+      }
+    } else {
+      int dx = x - g_last_mx;
+      int dy = y - g_last_my;
+      g_rot_y += dx * 0.5f;
+      g_rot_x += dy * 0.5f;
+      g_last_mx = x;
+      g_last_my = y;
+      glutPostRedisplay();
+    }
   }
 
   g_import_hover = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   g_export_hover = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
   g_rotate_hover = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
   g_texture_hover = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
+  g_paint_hover = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
   glutPostRedisplay();
 }
 
@@ -817,6 +1082,17 @@ static void keyboard(unsigned char key, int, int) {
     g_auto_rot_enabled = !g_auto_rot_enabled;
     printf("Rotacao automatica: %s\n",
            g_auto_rot_enabled ? "LIGADA" : "DESLIGADA");
+    glutPostRedisplay();
+    break;
+  case 'p':
+  case 'P':
+    if (g_paint_mode || g_show_palette) {
+      g_paint_mode = false;
+      g_show_palette = false;
+    } else {
+      g_show_palette = true;
+    }
+    printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
     glutPostRedisplay();
     break;
   case 27:
