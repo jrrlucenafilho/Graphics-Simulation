@@ -152,16 +152,21 @@ static bool load_stl_binary(const std::string &path) {
 
 static bool is_ascii_stl(const std::string &path) {
   std::ifstream f(path.c_str());
-  if (!f) return false;
+  if (!f)
+    return false;
   std::string first;
   std::getline(f, first);
-  for (char &c : first) c = (char)tolower(c);
-  if (first.find("solid") == std::string::npos) return false;
+  for (char &c : first)
+    c = (char)tolower(c);
+  if (first.find("solid") == std::string::npos)
+    return false;
   for (int i = 0; i < 10; i++) {
     std::string l;
     std::getline(f, l);
-    for (char &c : l) c = (char)tolower(c);
-    if (l.find("facet") != std::string::npos || l.find("vertex") != std::string::npos)
+    for (char &c : l)
+      c = (char)tolower(c);
+    if (l.find("facet") != std::string::npos ||
+        l.find("vertex") != std::string::npos)
       return true;
   }
   return false;
