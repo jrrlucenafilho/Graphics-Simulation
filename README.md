@@ -28,11 +28,18 @@ Tema e funcionamento geral do programa
 - **OpenGL** (`libgl1-mesa-dev`)
 - **GLU** (`libglu1-mesa-dev`)
 - **FreeGLUT** (`freeglut3-dev`)
+- **Zenity** (`zenity`) — usado para as janelas de diálogo (Abrir/Salvar arquivos)
 
 ### Compilar
 
 ```bash
-g++ -o stl_viewer main.cpp -lGL -lGLU -lglut
+make
+```
+
+### Limpar
+
+```bash
+make clean
 ```
 
 ### Executar
@@ -45,6 +52,32 @@ g++ -o stl_viewer main.cpp -lGL -lGLU -lglut
 Use o botão **Importar** (ou tecla `I`) para selecionar um arquivo STL.  
 Use o botão **Exportar** (ou tecla `E`) para salvar o modelo carregado.  
 Arraste o mouse para rotacionar, scroll para zoom, tecla `R` para resetar a visualização e `ESC` para sair.
+
+---
+
+## Estrutura do projeto
+
+```
+Projeto Final/
+├── src/
+│   ├── main.cpp                     # Entry point + GLUT callbacks
+│   ├── core/
+│   │   └── common.h                 # Vec3, Vec2, Triangle + globals
+│   ├── io/                          # Operações de entrada/saída
+│   │   ├── file_dialog.h/cpp        # Janelas de diálogo (zenity)
+│   │   ├── stl_io.h/cpp             # Load/save STL, centralizar, UV
+│   │   ├── texture.h/cpp            # Carregamento de texturas
+│   │   └── stb_image.h              # Biblioteca de imagens
+│   ├── render/                      # Renderização
+│   │   ├── scene.h/cpp              # Cena 3D (grid, luzes, eixos, spline)
+│   │   └── ui.h/cpp                 # Interface 2D (botões, paleta)
+│   └── interaction/                 # Interação do usuário
+│       └── interaction.h/cpp        # Ray picking, arrastar lâmpadas
+├── build/                           # Objetos compilados (gerado)
+├── models/                          # Modelos STL de exemplo
+├── Makefile
+└── README.md
+```
 
 ---
 
