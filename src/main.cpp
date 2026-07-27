@@ -13,8 +13,7 @@
 std::vector<Triangle> g_triangles;
 bool g_model_loaded = false;
 float g_rot_x = 0.0f, g_rot_y = 0.0f;
-float g_auto_rot = 0.0f;
-bool g_auto_rot_enabled = false;
+
 int g_last_mx = 0, g_last_my = 0;
 bool g_dragging = false;
 float g_zoom = 1.0f;
@@ -22,7 +21,6 @@ int g_win_w = WINDOW_WIDTH, g_win_h = WINDOW_HEIGHT;
 
 bool g_import_hover = false;
 bool g_export_hover = false;
-bool g_rotate_hover = false;
 bool g_texture_hover = false;
 
 GLuint g_texture_id = 0;
@@ -59,21 +57,14 @@ static void idle() {
     }
     glutPostRedisplay();
   }
-  if (g_auto_rot_enabled) {
-    g_auto_rot += 0.3f;
-    if (g_auto_rot > 360.0f)
-      g_auto_rot -= 360.0f;
-    glutPostRedisplay();
-  }
 }
 
 static void mouse(int button, int state, int x, int y) {
   bool over_import = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   bool over_export = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
-  bool over_rotate = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
-  bool over_texture = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
-  bool over_paint = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
-  bool over_showcase = (x >= 670 && x <= 790 && y >= 50 && y <= 85);
+  bool over_texture = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
+  bool over_paint = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
+  bool over_showcase = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
     if (over_paint) {
@@ -153,13 +144,6 @@ static void mouse(int button, int state, int x, int y) {
           printf("Erro ao exportar.\n");
         }
       }
-      return;
-    }
-    if (over_rotate) {
-      g_auto_rot_enabled = !g_auto_rot_enabled;
-      printf("Rotacao automatica: %s\n",
-             g_auto_rot_enabled ? "LIGADA" : "DESLIGADA");
-      glutPostRedisplay();
       return;
     }
     if (over_texture) {
@@ -268,10 +252,9 @@ static void motion(int x, int y) {
 
   g_import_hover = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   g_export_hover = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
-  g_rotate_hover = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
-  g_texture_hover = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
-  g_paint_hover = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
-  g_showcase_hover = (x >= 670 && x <= 790 && y >= 50 && y <= 85);
+  g_texture_hover = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
+  g_paint_hover = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
+  g_showcase_hover = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
   glutPostRedisplay();
 }
 
@@ -322,13 +305,6 @@ static void keyboard(unsigned char key, int, int) {
     }
     break;
   }
-  case 'r':
-  case 'R':
-    g_auto_rot_enabled = !g_auto_rot_enabled;
-    printf("Rotacao automatica: %s\n",
-           g_auto_rot_enabled ? "LIGADA" : "DESLIGADA");
-    glutPostRedisplay();
-    break;
   case 'p':
   case 'P':
     if (g_paint_mode || g_show_palette) {

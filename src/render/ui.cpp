@@ -56,8 +56,7 @@ void draw_info_text() {
   char buf[256];
   if (g_model_loaded) {
     snprintf(buf, sizeof(buf),
-             "Triangulos: %zu | Arraste: rotacao | Scroll: zoom | R: rotacao "
-             "auto | P: pintar",
+             "Triangulos: %zu | Arraste: rotacao | Scroll: zoom | P: pintar",
              g_triangles.size());
   } else {
     snprintf(buf, sizeof(buf), "Nenhum modelo carregado. Clique em Importar.");

@@ -51,15 +51,13 @@ struct Triangle {
 extern std::vector<Triangle> g_triangles;
 extern bool g_model_loaded;
 extern float g_rot_x, g_rot_y;
-extern float g_auto_rot;
-extern bool g_auto_rot_enabled;
+
 extern int g_last_mx, g_last_my;
 extern bool g_dragging;
 extern float g_zoom;
 extern int g_win_w, g_win_h;
 extern bool g_import_hover;
 extern bool g_export_hover;
-extern bool g_rotate_hover;
 extern bool g_texture_hover;
 extern GLuint g_texture_id;
 extern bool g_texture_loaded;

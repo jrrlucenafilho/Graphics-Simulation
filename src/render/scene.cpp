@@ -117,8 +117,6 @@ static void draw_axes_indicator() {
   glLoadIdentity();
   glTranslatef(0, 0, -3.0f);
   glRotatef(g_rot_x, 1, 0, 0);
-  if (g_auto_rot_enabled)
-    glRotatef(g_auto_rot, 0, 1, 0);
   glRotatef(g_rot_y, 0, 1, 0);
 
   float len = 0.8f;
@@ -245,8 +243,6 @@ void render_scene() {
   } else {
     glTranslatef(0, 0, -5.0f * (2.0f - g_zoom));
     glRotatef(g_rot_x, 1, 0, 0);
-    if (g_auto_rot_enabled)
-      glRotatef(g_auto_rot, 0, 1, 0);
     glRotatef(g_rot_y, 0, 1, 0);
   }
 
@@ -341,13 +337,10 @@ void render_scene() {
 
   draw_button(20, 50, 120, 35, "Importar", g_import_hover);
   draw_button(150, 50, 120, 35, "Exportar", g_export_hover);
-  draw_button(280, 50, 120, 35,
-              g_auto_rot_enabled ? "Rotacao:ON" : "Rotacao:OFF",
-              g_rotate_hover);
-  draw_button(410, 50, 120, 35, "Textura", g_texture_hover);
-  draw_button(540, 50, 120, 35, g_paint_mode ? "Pintar:ON" : "Pintar",
+  draw_button(280, 50, 120, 35, "Textura", g_texture_hover);
+  draw_button(410, 50, 120, 35, g_paint_mode ? "Pintar:ON" : "Pintar",
               g_paint_hover);
-  draw_button(670, 50, 120, 35, g_showcase_active ? "Showcase:ON" : "Showcase",
+  draw_button(540, 50, 120, 35, g_showcase_active ? "Showcase:ON" : "Showcase",
               g_showcase_hover);
   draw_info_text();
 
