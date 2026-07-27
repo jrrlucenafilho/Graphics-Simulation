@@ -82,6 +82,10 @@ static Vec3 g_selected_color(1.0f, 0.0f, 0.0f);
 static bool g_paint_hover = false;
 static bool g_has_painted_faces = false;
 
+// ---- Lamp manipulation ----
+static std::vector<Vec3> g_lamp_positions;
+static int g_selected_lamp = -1;
+
 // ---- STL loader ----
 
 static bool load_stl_ascii(const std::string &path) {
@@ -595,15 +599,69 @@ static void draw_lamp(const Vec3 &pos) {
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
 
-  // Wireframe lamp shade (cone: base at origin, apex at +z)
-  glColor3f(0.5f, 0.5f, 0.5f);
-  glutWireCone(0.3f, 0.4f, 16, 4);
+  // Wireframe bulb
+  glColor3f(0.9f, 0.9f, 0.5f);
+  glutWireSphere(0.15f, 12, 8);
 
-  // Wireframe bulb at the base of the shade
-  glColor3f(0.7f, 0.7f, 0.7f);
-  glTranslatef(0.0f, 0.0f, -0.02f);
-  glutWireSphere(0.12f, 10, 6);
+  glPopMatrix();
+}
 
+static void draw_axes_at(const Vec3 &pos) {
+  glPushMatrix();
+  glTranslatef(pos.x, pos.y, pos.z);
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+
+  float len = 0.5f;
+  glLineWidth(3.0f);
+
+  glColor3f(1, 0, 0);
+  glBegin(GL_LINES);
+  glVertex3f(0, 0, 0);
+  glVertex3f(len, 0, 0);
+  glEnd();
+  glBegin(GL_TRIANGLES);
+  glVertex3f(len * 1.15f, 0, 0);
+  glVertex3f(len * 0.85f, 0.05f, 0);
+  glVertex3f(len * 0.85f, -0.05f, 0);
+  glEnd();
+
+  glColor3f(0, 1, 0);
+  glBegin(GL_LINES);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, len, 0);
+  glEnd();
+  glBegin(GL_TRIANGLES);
+  glVertex3f(0, len * 1.15f, 0);
+  glVertex3f(0.05f, len * 0.85f, 0);
+  glVertex3f(-0.05f, len * 0.85f, 0);
+  glEnd();
+
+  glColor3f(0, 0, 1);
+  glBegin(GL_LINES);
+  glVertex3f(0, 0, 0);
+  glVertex3f(0, 0, len);
+  glEnd();
+  glBegin(GL_TRIANGLES);
+  glVertex3f(0, 0, len * 1.15f);
+  glVertex3f(0.05f, 0, len * 0.85f);
+  glVertex3f(-0.05f, 0, len * 0.85f);
+  glEnd();
+
+  glDisable(GL_DEPTH_TEST);
+  glColor3f(1, 0, 0);
+  glRasterPos3f(len * 1.3f, 0, 0);
+  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'X');
+  glColor3f(0, 1, 0);
+  glRasterPos3f(0, len * 1.3f, 0);
+  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'Y');
+  glColor3f(0, 0, 1);
+  glRasterPos3f(0, 0, len * 1.3f);
+  glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'Z');
+  glEnable(GL_DEPTH_TEST);
+
+  glLineWidth(1.0f);
   glPopMatrix();
 }
 
@@ -751,6 +809,63 @@ static int pick_triangle(int mx, int my) {
   return hit;
 }
 
+static int pick_lamp(int mx, int my) {
+  GLint viewport[4];
+  GLdouble mv[16], proj[16];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+  glGetDoublev(GL_PROJECTION_MATRIX, proj);
+
+  double sx, sy, sz;
+  float best_dist = 25.0f;
+  int best_idx = -1;
+
+  for (size_t i = 0; i < g_lamp_positions.size(); i++) {
+    gluProject(g_lamp_positions[i].x, g_lamp_positions[i].y,
+               g_lamp_positions[i].z, mv, proj, viewport, &sx, &sy, &sz);
+    if (sz < 0.0 || sz >= 1.0)
+      continue;
+    float d = sqrtf((mx - sx) * (mx - sx) +
+                    ((viewport[3] - my) - sy) * ((viewport[3] - my) - sy));
+    if (d < best_dist) {
+      best_dist = d;
+      best_idx = (int)i;
+    }
+  }
+  return best_idx;
+}
+
+static Vec3 get_view_direction() {
+  GLdouble mv[16];
+  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+  Vec3 d(-mv[2], -mv[6], -mv[10]);
+  d.normalize();
+  return d;
+}
+
+static Vec3 mouse_to_3d_plane(int mx, int my, const Vec3 &plane_normal,
+                              const Vec3 &plane_pt) {
+  GLint viewport[4];
+  GLdouble mv[16], proj[16];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+  glGetDoublev(GL_PROJECTION_MATRIX, proj);
+
+  double nx, ny, nz, fx, fy, fz;
+  gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
+  gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
+
+  Vec3 orig(nx, ny, nz);
+  Vec3 dir(fx - nx, fy - ny, fz - nz);
+  dir.normalize();
+
+  float denom = dir.dot(plane_normal);
+  if (fabs(denom) < 1e-6f)
+    return plane_pt;
+  float d = (plane_pt - orig).dot(plane_normal) / denom;
+  return orig + dir * d;
+}
+
 static void render_scene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -769,8 +884,12 @@ static void render_scene() {
   draw_grid_floor();
 
   // Draw wireframe lamps at light source positions
-  draw_lamp(Vec3(1.0f, 1.2f, 1.5f));
-  draw_lamp(Vec3(-1.0f, -0.5f, 2.5f));
+  for (size_t i = 0; i < g_lamp_positions.size(); i++)
+    draw_lamp(g_lamp_positions[i]);
+
+  // Draw axes on selected lamp
+  if (g_selected_lamp >= 0)
+    draw_axes_at(g_lamp_positions[g_selected_lamp]);
 
   if (g_show_palette)
     draw_palette();
@@ -780,8 +899,10 @@ static void render_scene() {
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
 
-    GLfloat light0_pos[] = {1.0f, 1.2f, 1.5f, 1.0f};
-    GLfloat light1_pos[] = {-1.0f, -0.5f, 2.5f, 1.0f};
+    GLfloat light0_pos[] = {g_lamp_positions[0].x, g_lamp_positions[0].y,
+                            g_lamp_positions[0].z, 1.0f};
+    GLfloat light1_pos[] = {g_lamp_positions[1].x, g_lamp_positions[1].y,
+                            g_lamp_positions[1].z, 1.0f};
     GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat dim[] = {0.3f, 0.3f, 0.3f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
@@ -987,6 +1108,25 @@ static void mouse(int button, int state, int x, int y) {
       return;
     }
 
+    // Lamp selection
+    int lamp_idx = pick_lamp(x, y);
+    if (lamp_idx >= 0) {
+      if (g_selected_lamp != lamp_idx) {
+        g_selected_lamp = lamp_idx;
+        g_dragging = true;
+        g_last_mx = x;
+        g_last_my = y;
+      } else {
+        g_selected_lamp = -1;
+      }
+      glutPostRedisplay();
+      return;
+    }
+    if (g_selected_lamp >= 0) {
+      g_selected_lamp = -1;
+      glutPostRedisplay();
+    }
+
     g_dragging = true;
     g_last_mx = x;
     g_last_my = y;
@@ -1013,6 +1153,16 @@ static void motion(int x, int y) {
         g_has_painted_faces = true;
         glutPostRedisplay();
       }
+    } else if (g_selected_lamp >= 0) {
+      Vec3 view_dir = get_view_direction();
+      int idx = g_selected_lamp;
+      Vec3 curr = mouse_to_3d_plane(x, y, view_dir, g_lamp_positions[idx]);
+      Vec3 prev = mouse_to_3d_plane(g_last_mx, g_last_my, view_dir,
+                                    g_lamp_positions[idx]);
+      g_lamp_positions[idx] = g_lamp_positions[idx] + (curr - prev);
+      g_last_mx = x;
+      g_last_my = y;
+      glutPostRedisplay();
     } else {
       int dx = x - g_last_mx;
       int dy = y - g_last_my;
@@ -1109,6 +1259,9 @@ int main(int argc, char **argv) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_NORMALIZE);
   glClearColor(0.15f, 0.15f, 0.2f, 1.0f);
+
+  g_lamp_positions.push_back(Vec3(1.0f, 1.2f, 1.5f));
+  g_lamp_positions.push_back(Vec3(-1.0f, -0.5f, 2.5f));
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
