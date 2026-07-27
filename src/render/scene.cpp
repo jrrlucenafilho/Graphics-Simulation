@@ -294,7 +294,7 @@ void render_scene() {
 
     if (g_has_painted_faces) {
       glEnable(GL_COLOR_MATERIAL);
-      glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+      glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     }
 
     glBegin(GL_TRIANGLES);
