@@ -560,6 +560,25 @@ static void draw_axes_indicator() {
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
+static void draw_grid_floor() {
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glColor3f(0.3f, 0.3f, 0.3f);
+  float s = 0.5f;
+  int n = 10;
+  for (int i = -n; i < n; i++) {
+    for (int j = -n; j < n; j++) {
+      float x = i * s, z = j * s;
+      glBegin(GL_LINE_LOOP);
+      glVertex3f(x, 0.0f, z);
+      glVertex3f(x + s, 0.0f, z);
+      glVertex3f(x + s, 0.0f, z + s);
+      glVertex3f(x, 0.0f, z + s);
+      glEnd();
+    }
+  }
+}
+
 static void render_scene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -574,6 +593,8 @@ static void render_scene() {
   if (g_auto_rot_enabled)
     glRotatef(g_auto_rot, 0, 1, 0);
   glRotatef(g_rot_y, 0, 1, 0);
+
+  draw_grid_floor();
 
   if (g_model_loaded) {
     glEnable(GL_LIGHTING);
