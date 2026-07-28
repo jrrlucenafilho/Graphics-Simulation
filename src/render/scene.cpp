@@ -254,9 +254,6 @@ void render_scene() {
   if (g_selected_lamp >= 0)
     draw_axes_at(g_lamp_positions[g_selected_lamp]);
 
-  if (g_show_palette)
-    draw_palette();
-
   if (g_model_loaded) {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -332,6 +329,9 @@ void render_scene() {
     glEnd();
     glLineWidth(1.0f);
   }
+
+  if (g_show_palette)
+    draw_palette();
 
   draw_axes_indicator();
 

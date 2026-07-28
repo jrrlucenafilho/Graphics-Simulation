@@ -73,6 +73,7 @@ void draw_info_text() {
 
 void draw_palette() {
   glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
 
@@ -152,5 +153,6 @@ void draw_palette() {
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
 
+  glDepthMask(GL_TRUE);
   glEnable(GL_DEPTH_TEST);
 }
