@@ -5,6 +5,7 @@ SRC      = src
 BLD      = build
 
 _OBJS    = main.o \
+           core/transform.o \
            io/stl_io.o io/texture.o io/file_dialog.o \
            render/scene.o render/ui.o \
            interaction/interaction.o
