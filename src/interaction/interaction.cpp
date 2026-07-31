@@ -34,8 +34,11 @@ int pick_triangle(int mx, int my) {
   gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
   gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
 
-  Vec3 orig(nx, ny, nz);
-  Vec3 dir(fx - nx, fy - ny, fz - nz);
+  // O modelo é desenhado com glScalef, mas os triângulos ficam armazenados
+  // sem escala; leva o raio para o espaço do modelo com a escala inversa.
+  Vec3 orig(nx / g_scale_x, ny / g_scale_y, nz / g_scale_z);
+  Vec3 dir((fx - nx) / g_scale_x, (fy - ny) / g_scale_y,
+           (fz - nz) / g_scale_z);
   dir.normalize();
 
   float closest = 1e10f;
