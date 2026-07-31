@@ -72,5 +72,6 @@ extern float g_showcase_time;
 extern float g_showcase_duration;
 extern std::vector<Vec3> g_lamp_positions;
 extern int g_selected_lamp;
+extern float g_scale_x, g_scale_y, g_scale_z;
 
 #endif

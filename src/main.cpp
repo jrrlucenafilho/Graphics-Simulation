@@ -1,4 +1,5 @@
 #include "core/common.h"
+#include "core/transform.h"
 #include "io/file_dialog.h"
 #include "interaction/interaction.h"
 #include "render/scene.h"
@@ -259,6 +260,8 @@ static void motion(int x, int y) {
 }
 
 static void keyboard(unsigned char key, int, int) {
+  if (handle_scale_key(key))
+    return;
   switch (key) {
   case 'i':
   case 'I': {

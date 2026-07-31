@@ -254,6 +254,11 @@ void render_scene() {
   if (g_selected_lamp >= 0)
     draw_axes_at(g_lamp_positions[g_selected_lamp]);
 
+  // Escala não uniforme via matriz de transformação; GL_NORMALIZE (habilitado
+  // no init) mantém as normais unitárias para a iluminação.
+  glPushMatrix();
+  glScalef(g_scale_x, g_scale_y, g_scale_z);
+
   if (g_model_loaded) {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -314,6 +319,8 @@ void render_scene() {
     glColor3f(0.4f, 0.4f, 0.6f);
     glutWireTeapot(1.0);
   }
+
+  glPopMatrix();
 
   if (g_showcase_active) {
     glDisable(GL_LIGHTING);
