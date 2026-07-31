@@ -134,14 +134,22 @@ bool export_stl_ascii(const std::string &path) {
   std::ofstream f(path.c_str());
   if (!f)
     return false;
+  // Aplica a escala atual (feita via matriz na renderização) aos vértices
+  // exportados, para que o arquivo reflita o modelo como exibido na tela.
   f << "solid exported\n";
   for (size_t i = 0; i < g_triangles.size(); i++) {
-    f << "  facet normal " << g_triangles[i].normal.x << " "
-      << g_triangles[i].normal.y << " " << g_triangles[i].normal.z << "\n";
+    Vec3 v[3];
+    for (int j = 0; j < 3; j++) {
+      v[j] = Vec3(g_triangles[i].v[j].x * g_scale_x,
+                  g_triangles[i].v[j].y * g_scale_y,
+                  g_triangles[i].v[j].z * g_scale_z);
+    }
+    Vec3 n = (v[1] - v[0]).cross(v[2] - v[0]);
+    n.normalize();
+    f << "  facet normal " << n.x << " " << n.y << " " << n.z << "\n";
     f << "    outer loop\n";
     for (int j = 0; j < 3; j++)
-      f << "      vertex " << g_triangles[i].v[j].x << " "
-        << g_triangles[i].v[j].y << " " << g_triangles[i].v[j].z << "\n";
+      f << "      vertex " << v[j].x << " " << v[j].y << " " << v[j].z << "\n";
     f << "    endloop\n";
     f << "  endfacet\n";
   }
