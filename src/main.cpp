@@ -43,16 +43,20 @@ int g_selected_lamp = -1;
 
 static void display() { render_scene(); }
 
-static void reshape(int w, int h) {
+static void reshape(int w, int h)
+{
   g_win_w = w;
   g_win_h = h;
   glViewport(0, 0, w, h);
 }
 
-static void idle() {
-  if (g_showcase_active) {
+static void idle()
+{
+  if (g_showcase_active)
+  {
     g_showcase_time += 0.016f;
-    if (g_showcase_time >= g_showcase_duration) {
+    if (g_showcase_time >= g_showcase_duration)
+    {
       g_showcase_active = false;
       g_showcase_time = 0.0f;
     }
@@ -60,21 +64,27 @@ static void idle() {
   }
 }
 
-static void mouse(int button, int state, int x, int y) {
+static void mouse(int button, int state, int x, int y)
+{
   bool over_import = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   bool over_export = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
   bool over_texture = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
   bool over_paint = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
   bool over_showcase = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
 
-  if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-    if (over_paint) {
+  if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+  {
+    if (over_paint)
+    {
       g_showcase_active = false;
       g_showcase_time = 0.0f;
-      if (g_paint_mode || g_show_palette) {
+      if (g_paint_mode || g_show_palette)
+      {
         g_paint_mode = false;
         g_show_palette = false;
-      } else {
+      }
+      else
+      {
         g_show_palette = true;
       }
       printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
@@ -82,28 +92,33 @@ static void mouse(int button, int state, int x, int y) {
       return;
     }
 
-    if (g_show_palette) {
+    if (g_show_palette)
+    {
       int ss = 50, sp = 20;
       int total_w = 3 * ss + 2 * sp;
       int start_x = (g_win_w - total_w) / 2;
       int pal_y = 100;
       int sy = pal_y + 15;
-      if (y >= sy && y <= sy + ss) {
-        if (x >= start_x && x <= start_x + ss) {
+      if (y >= sy && y <= sy + ss)
+      {
+        if (x >= start_x && x <= start_x + ss)
+        {
           g_selected_color = Vec3(1, 0, 0);
           g_paint_mode = true;
           printf("Cor selecionada: VERMELHO\n");
           glutPostRedisplay();
           return;
         }
-        if (x >= start_x + ss + sp && x <= start_x + 2 * ss + sp) {
+        if (x >= start_x + ss + sp && x <= start_x + 2 * ss + sp)
+        {
           g_selected_color = Vec3(0, 1, 0);
           g_paint_mode = true;
           printf("Cor selecionada: VERDE\n");
           glutPostRedisplay();
           return;
         }
-        if (x >= start_x + 2 * ss + 2 * sp && x <= start_x + 3 * ss + 2 * sp) {
+        if (x >= start_x + 2 * ss + 2 * sp && x <= start_x + 3 * ss + 2 * sp)
+        {
           g_selected_color = Vec3(0, 0, 1);
           g_paint_mode = true;
           printf("Cor selecionada: AZUL\n");
@@ -113,45 +128,61 @@ static void mouse(int button, int state, int x, int y) {
       }
     }
 
-    if (over_import) {
+    if (over_import)
+    {
       g_showcase_active = false;
       g_showcase_time = 0.0f;
       std::string path = open_file_dialog();
-      if (!path.empty()) {
-        if (load_stl(path)) {
+      if (!path.empty())
+      {
+        if (load_stl(path))
+        {
           center_model();
           generate_uv_coords();
+          reset_model_transform();
           g_paint_mode = false;
           g_show_palette = false;
           g_has_painted_faces = false;
           printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                  g_triangles.size());
-        } else {
+        }
+        else
+        {
           printf("Erro ao carregar: %s\n", path.c_str());
         }
       }
       return;
     }
-    if (over_export) {
-      if (!g_model_loaded) {
+    if (over_export)
+    {
+      if (!g_model_loaded)
+      {
         printf("Nenhum modelo para exportar.\n");
         return;
       }
       std::string path = save_file_dialog();
-      if (!path.empty()) {
-        if (export_stl_ascii(path)) {
+      if (!path.empty())
+      {
+        if (export_stl_ascii(path))
+        {
           printf("Modelo exportado: %s\n", path.c_str());
-        } else {
+        }
+        else
+        {
           printf("Erro ao exportar.\n");
         }
       }
       return;
     }
-    if (over_texture) {
+    if (over_texture)
+    {
       std::string path = open_texture_dialog();
-      if (!path.empty()) {
-        if (load_texture(path)) {
-          if (!g_model_loaded) {
+      if (!path.empty())
+      {
+        if (load_texture(path))
+        {
+          if (!g_model_loaded)
+          {
             printf("A textura sera exibida quando um modelo for carregado.\n");
           }
           glutPostRedisplay();
@@ -159,11 +190,15 @@ static void mouse(int button, int state, int x, int y) {
       }
       return;
     }
-    if (over_showcase) {
-      if (g_showcase_active) {
+    if (over_showcase)
+    {
+      if (g_showcase_active)
+      {
         g_showcase_active = false;
         g_showcase_time = 0.0f;
-      } else {
+      }
+      else
+      {
         g_showcase_active = true;
         g_showcase_time = 0.0f;
       }
@@ -172,12 +207,14 @@ static void mouse(int button, int state, int x, int y) {
       return;
     }
 
-    if (g_paint_mode && g_model_loaded) {
+    if (g_paint_mode && g_model_loaded)
+    {
       g_dragging = true;
       g_last_mx = x;
       g_last_my = y;
       int idx = pick_triangle(x, y);
-      if (idx >= 0) {
+      if (idx >= 0)
+      {
         g_triangles[idx].color = g_selected_color;
         g_has_painted_faces = true;
         glutPostRedisplay();
@@ -186,19 +223,24 @@ static void mouse(int button, int state, int x, int y) {
     }
 
     int lamp_idx = pick_lamp(x, y);
-    if (lamp_idx >= 0) {
-      if (g_selected_lamp != lamp_idx) {
+    if (lamp_idx >= 0)
+    {
+      if (g_selected_lamp != lamp_idx)
+      {
         g_selected_lamp = lamp_idx;
         g_dragging = true;
         g_last_mx = x;
         g_last_my = y;
-      } else {
+      }
+      else
+      {
         g_selected_lamp = -1;
       }
       glutPostRedisplay();
       return;
     }
-    if (g_selected_lamp >= 0) {
+    if (g_selected_lamp >= 0)
+    {
       g_selected_lamp = -1;
       glutPostRedisplay();
     }
@@ -207,29 +249,38 @@ static void mouse(int button, int state, int x, int y) {
     g_last_mx = x;
     g_last_my = y;
   }
-  if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+  if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+  {
     g_dragging = false;
   }
 
-  if (button == 3) {
+  if (button == 3)
+  {
     g_zoom = std::min(g_zoom + 0.1f, 3.0f);
   }
-  if (button == 4) {
+  if (button == 4)
+  {
     g_zoom = std::max(g_zoom - 0.1f, 0.3f);
   }
   glutPostRedisplay();
 }
 
-static void motion(int x, int y) {
-  if (g_dragging) {
-    if (g_paint_mode && g_model_loaded && !g_showcase_active) {
+static void motion(int x, int y)
+{
+  if (g_dragging)
+  {
+    if (g_paint_mode && g_model_loaded && !g_showcase_active)
+    {
       int idx = pick_triangle(x, y);
-      if (idx >= 0) {
+      if (idx >= 0)
+      {
         g_triangles[idx].color = g_selected_color;
         g_has_painted_faces = true;
         glutPostRedisplay();
       }
-    } else if (g_selected_lamp >= 0) {
+    }
+    else if (g_selected_lamp >= 0)
+    {
       Vec3 view_dir = get_view_direction();
       int idx = g_selected_lamp;
       Vec3 curr =
@@ -240,7 +291,9 @@ static void motion(int x, int y) {
       g_last_mx = x;
       g_last_my = y;
       glutPostRedisplay();
-    } else if (!g_showcase_active) {
+    }
+    else if (!g_showcase_active)
+    {
       int dx = x - g_last_mx;
       int dy = y - g_last_my;
       g_rot_y += dx * 0.5f;
@@ -259,35 +312,51 @@ static void motion(int x, int y) {
   glutPostRedisplay();
 }
 
-static void keyboard(unsigned char key, int, int) {
-  if (handle_scale_key(key))
+static void special_keys(int key, int, int)
+{
+  handle_transform_special_key(key);
+}
+
+static void keyboard(unsigned char key, int, int)
+{
+  if (handle_transform_key(key))
     return;
-  switch (key) {
+  switch (key)
+  {
   case 'i':
-  case 'I': {
+  case 'I':
+  {
     g_showcase_active = false;
     g_showcase_time = 0.0f;
     std::string path = open_file_dialog();
-    if (!path.empty()) {
-      if (load_stl(path)) {
+    if (!path.empty())
+    {
+      if (load_stl(path))
+      {
         center_model();
         generate_uv_coords();
+        reset_model_transform();
         printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                g_triangles.size());
-      } else {
+      }
+      else
+      {
         printf("Erro ao carregar: %s\n", path.c_str());
       }
     }
     break;
   }
   case 'e':
-  case 'E': {
-    if (!g_model_loaded) {
+  case 'E':
+  {
+    if (!g_model_loaded)
+    {
       printf("Nenhum modelo.\n");
       break;
     }
     std::string path = save_file_dialog();
-    if (!path.empty()) {
+    if (!path.empty())
+    {
       if (export_stl_ascii(path))
         printf("Exportado: %s\n", path.c_str());
       else
@@ -296,11 +365,15 @@ static void keyboard(unsigned char key, int, int) {
     break;
   }
   case 't':
-  case 'T': {
+  case 'T':
+  {
     std::string path = open_texture_dialog();
-    if (!path.empty()) {
-      if (load_texture(path)) {
-        if (!g_model_loaded) {
+    if (!path.empty())
+    {
+      if (load_texture(path))
+      {
+        if (!g_model_loaded)
+        {
           printf("A textura sera exibida quando um modelo for carregado.\n");
         }
         glutPostRedisplay();
@@ -310,10 +383,13 @@ static void keyboard(unsigned char key, int, int) {
   }
   case 'p':
   case 'P':
-    if (g_paint_mode || g_show_palette) {
+    if (g_paint_mode || g_show_palette)
+    {
       g_paint_mode = false;
       g_show_palette = false;
-    } else {
+    }
+    else
+    {
       g_show_palette = true;
     }
     printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
@@ -321,10 +397,13 @@ static void keyboard(unsigned char key, int, int) {
     break;
   case 's':
   case 'S':
-    if (g_showcase_active) {
+    if (g_showcase_active)
+    {
       g_showcase_active = false;
       g_showcase_time = 0.0f;
-    } else {
+    }
+    else
+    {
       g_showcase_active = true;
       g_showcase_time = 0.0f;
     }
@@ -336,7 +415,8 @@ static void keyboard(unsigned char key, int, int) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glutInitWindowSize(g_win_w, g_win_h);
@@ -356,11 +436,15 @@ int main(int argc, char **argv) {
   glutMotionFunc(motion);
   glutPassiveMotionFunc(motion);
   glutKeyboardFunc(keyboard);
+  glutSpecialFunc(special_keys);
 
-  if (argc > 1) {
-    if (load_stl(argv[1])) {
+  if (argc > 1)
+  {
+    if (load_stl(argv[1]))
+    {
       center_model();
       generate_uv_coords();
+      reset_model_transform();
       printf("Modelo carregado: %s (%zu triangulos)\n", argv[1],
              g_triangles.size());
     }

@@ -9,26 +9,32 @@
 #include <string>
 #include <vector>
 
-struct Vec3 {
+struct Vec3
+{
   float x, y, z;
   Vec3() : x(0), y(0), z(0) {}
   Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
-  Vec3 operator-(const Vec3 &o) const {
+  Vec3 operator-(const Vec3 &o) const
+  {
     return Vec3(x - o.x, y - o.y, z - o.z);
   }
-  Vec3 operator+(const Vec3 &o) const {
+  Vec3 operator+(const Vec3 &o) const
+  {
     return Vec3(x + o.x, y + o.y, z + o.z);
   }
   Vec3 operator*(float s) const { return Vec3(x * s, y * s, z * s); }
   Vec3 operator-() const { return Vec3(-x, -y, -z); }
   float dot(const Vec3 &o) const { return x * o.x + y * o.y + z * o.z; }
-  Vec3 cross(const Vec3 &o) const {
+  Vec3 cross(const Vec3 &o) const
+  {
     return Vec3(y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x);
   }
   float length() const { return sqrtf(x * x + y * y + z * z); }
-  void normalize() {
+  void normalize()
+  {
     float l = length();
-    if (l > 1e-8f) {
+    if (l > 1e-8f)
+    {
       x /= l;
       y /= l;
       z /= l;
@@ -36,13 +42,15 @@ struct Vec3 {
   }
 };
 
-struct Vec2 {
+struct Vec2
+{
   float u, v;
   Vec2() : u(0), v(0) {}
   Vec2(float u, float v) : u(u), v(v) {}
 };
 
-struct Triangle {
+struct Triangle
+{
   Vec3 normal, v[3];
   Vec2 uv[3];
   Vec3 color;
@@ -72,6 +80,8 @@ extern float g_showcase_time;
 extern float g_showcase_duration;
 extern std::vector<Vec3> g_lamp_positions;
 extern int g_selected_lamp;
+extern float g_translate_x, g_translate_y, g_translate_z;
+extern float g_model_rot_x, g_model_rot_y, g_model_rot_z;
 extern float g_scale_x, g_scale_y, g_scale_z;
 
 #endif

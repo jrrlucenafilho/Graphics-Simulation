@@ -1,8 +1,10 @@
 #include "ui.h"
+#include "core/transform.h"
 #include <cstdio>
 #include <cstring>
 
-void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
+void draw_button(int x, int y, int w, int h, const char *label, bool hover)
+{
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -11,9 +13,12 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glPushMatrix();
   glLoadIdentity();
 
-  if (hover) {
+  if (hover)
+  {
     glColor3f(0.3f, 0.6f, 1.0f);
-  } else {
+  }
+  else
+  {
     glColor3f(0.2f, 0.4f, 0.8f);
   }
   glBegin(GL_QUADS);
@@ -43,7 +48,8 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glPopMatrix();
 }
 
-void draw_info_text() {
+void draw_info_text()
+{
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -52,19 +58,42 @@ void draw_info_text() {
   glPushMatrix();
   glLoadIdentity();
 
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
   glColor3f(0.8f, 0.8f, 0.8f);
-  char buf[256];
-  if (g_model_loaded) {
-    snprintf(buf, sizeof(buf),
-             "Triangulos: %zu | Arraste: rotacao | Scroll: zoom | P: pintar | "
-             "X/x Y/y Z/z: esticar (%.2f, %.2f, %.2f)",
-             g_triangles.size(), g_scale_x, g_scale_y, g_scale_z);
-  } else {
-    snprintf(buf, sizeof(buf), "Nenhum modelo carregado. Clique em Importar.");
+
+  char line1[256];
+  char line2[256];
+  const char *line3 =
+      "1: mover | 2: girar | 3: esticar | Setas: X/Y | PgUp/PgDn: Z | R: reset";
+
+  if (g_model_loaded)
+  {
+    snprintf(line1, sizeof(line1), "Triangulos: %zu | Modo: %s",
+             g_triangles.size(), transform_mode_name());
+    snprintf(line2, sizeof(line2),
+             "T=(%.2f, %.2f, %.2f) | R=(%.0f, %.0f, %.0f) | "
+             "S=(%.2f, %.2f, %.2f)",
+             g_translate_x, g_translate_y, g_translate_z, g_model_rot_x,
+             g_model_rot_y, g_model_rot_z, g_scale_x, g_scale_y, g_scale_z);
   }
-  glWindowPos2i(10, g_win_h - 28);
-  for (const char *c = buf; *c; c++)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
+  else
+  {
+    snprintf(line1, sizeof(line1),
+             "Nenhum modelo carregado. Clique em Importar. | Modo: %s",
+             transform_mode_name());
+    snprintf(line2, sizeof(line2),
+             "O bule de teste tambem responde as transformacoes.");
+  }
+
+  const char *lines[] = {line1, line2, line3};
+  const int y_positions[] = {50, 34, 18};
+  for (int i = 0; i < 3; i++)
+  {
+    glWindowPos2i(10, y_positions[i]);
+    for (const char *c = lines[i]; *c; c++)
+      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
+  }
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -72,7 +101,8 @@ void draw_info_text() {
   glPopMatrix();
 }
 
-void draw_palette() {
+void draw_palette()
+{
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
   glDisable(GL_LIGHTING);

@@ -1,16 +1,20 @@
 #include "scene.h"
 #include "core/common.h"
+#include "core/transform.h"
 #include "ui.h"
 #include <cstdio>
 
-static void draw_grid_floor() {
+static void draw_grid_floor()
+{
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
   glColor3f(0.3f, 0.3f, 0.3f);
   float s = 0.5f;
   int n = 10;
-  for (int i = -n; i < n; i++) {
-    for (int j = -n; j < n; j++) {
+  for (int i = -n; i < n; i++)
+  {
+    for (int j = -n; j < n; j++)
+    {
       float x = i * s, z = j * s;
       glBegin(GL_LINE_LOOP);
       glVertex3f(x, 0.0f, z);
@@ -22,7 +26,8 @@ static void draw_grid_floor() {
   }
 }
 
-static void draw_lamp(const Vec3 &pos) {
+static void draw_lamp(const Vec3 &pos)
+{
   glPushMatrix();
   glTranslatef(pos.x, pos.y, pos.z);
 
@@ -35,7 +40,8 @@ static void draw_lamp(const Vec3 &pos) {
   glPopMatrix();
 }
 
-static void draw_axes_at(const Vec3 &pos) {
+static void draw_axes_at(const Vec3 &pos)
+{
   glPushMatrix();
   glTranslatef(pos.x, pos.y, pos.z);
 
@@ -94,7 +100,8 @@ static void draw_axes_at(const Vec3 &pos) {
   glPopMatrix();
 }
 
-static void draw_axes_indicator() {
+static void draw_axes_indicator()
+{
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -199,21 +206,28 @@ static void draw_axes_indicator() {
 }
 
 static Vec3 catmull_rom(const Vec3 &p0, const Vec3 &p1, const Vec3 &p2,
-                         const Vec3 &p3, float t) {
+                        const Vec3 &p3, float t)
+{
   float t2 = t * t;
   float t3 = t2 * t;
   return (p1 * 2.0f +
           (p2 - p0) * t +
           (p0 * 2.0f - p1 * 5.0f + p2 * 4.0f - p3) * t2 +
-          (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) * 0.5f;
+          (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) *
+         0.5f;
 }
 
-static Vec3 eval_showcase_spline(float t) {
+static Vec3 eval_showcase_spline(float t)
+{
   static const Vec3 pts[] = {
-    Vec3(3.5f, 0.8f, 0.0f),  Vec3(2.5f, 1.5f, 2.5f),
-    Vec3(0.0f, 1.8f, 3.5f),  Vec3(-2.5f, 1.2f, 2.5f),
-    Vec3(-3.5f, 0.5f, 0.0f), Vec3(-2.5f, -0.2f, -2.5f),
-    Vec3(0.0f, -0.5f, -3.5f),Vec3(2.5f, 0.2f, -2.5f),
+      Vec3(3.5f, 0.8f, 0.0f),
+      Vec3(2.5f, 1.5f, 2.5f),
+      Vec3(0.0f, 1.8f, 3.5f),
+      Vec3(-2.5f, 1.2f, 2.5f),
+      Vec3(-3.5f, 0.5f, 0.0f),
+      Vec3(-2.5f, -0.2f, -2.5f),
+      Vec3(0.0f, -0.5f, -3.5f),
+      Vec3(2.5f, 0.2f, -2.5f),
   };
   const int n = 8;
   float seg = t * n;
@@ -227,7 +241,8 @@ static Vec3 eval_showcase_spline(float t) {
   return catmull_rom(p0, p1, p2, p3, frac);
 }
 
-void render_scene() {
+void render_scene()
+{
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
@@ -236,11 +251,14 @@ void render_scene() {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  if (g_showcase_active) {
+  if (g_showcase_active)
+  {
     float t = g_showcase_time / g_showcase_duration;
     Vec3 pos = eval_showcase_spline(t);
     gluLookAt(pos.x, pos.y, pos.z, 0, 0, 0, 0, 1, 0);
-  } else {
+  }
+  else
+  {
     glTranslatef(0, 0, -5.0f * (2.0f - g_zoom));
     glRotatef(g_rot_x, 1, 0, 0);
     glRotatef(g_rot_y, 0, 1, 0);
@@ -254,16 +272,15 @@ void render_scene() {
   if (g_selected_lamp >= 0)
     draw_axes_at(g_lamp_positions[g_selected_lamp]);
 
-  // Escala não uniforme via matriz de transformação; GL_NORMALIZE (habilitado
-  // no init) mantém as normais unitárias para a iluminação.
-  glPushMatrix();
-  glScalef(g_scale_x, g_scale_y, g_scale_z);
-
-  if (g_model_loaded) {
+  if (g_model_loaded)
+  {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
 
+    // As posições são enviadas antes da transformação exclusiva do modelo.
+    // Assim, a esfera da lâmpada e a origem real da luz permanecem no mesmo
+    // lugar mesmo quando o STL é movido, girado ou esticado.
     GLfloat light0_pos[] = {g_lamp_positions[0].x, g_lamp_positions[0].y,
                             g_lamp_positions[0].z, 1.0f};
     GLfloat light1_pos[] = {g_lamp_positions[1].x, g_lamp_positions[1].y,
@@ -276,12 +293,18 @@ void render_scene() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, dim);
     glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 
-    if (g_texture_loaded) {
+    glPushMatrix();
+    apply_model_transform();
+
+    if (g_texture_loaded)
+    {
       GLfloat mat_diff_tex[] = {1.0f, 1.0f, 1.0f, 1.0f};
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diff_tex);
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, g_texture_id);
-    } else {
+    }
+    else
+    {
       GLfloat mat_diff[] = {0.7f, 0.7f, 0.9f, 1.0f};
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diff);
     }
@@ -290,19 +313,22 @@ void render_scene() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_spec);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shin);
 
-    if (g_has_painted_faces) {
+    if (g_has_painted_faces)
+    {
       glEnable(GL_COLOR_MATERIAL);
       glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     }
 
     glBegin(GL_TRIANGLES);
-    for (size_t i = 0; i < g_triangles.size(); i++) {
+    for (size_t i = 0; i < g_triangles.size(); i++)
+    {
       if (g_has_painted_faces)
         glColor3f(g_triangles[i].color.x, g_triangles[i].color.y,
                   g_triangles[i].color.z);
       glNormal3f(g_triangles[i].normal.x, g_triangles[i].normal.y,
                  g_triangles[i].normal.z);
-      for (int j = 0; j < 3; j++) {
+      for (int j = 0; j < 3; j++)
+      {
         if (g_texture_loaded)
           glTexCoord2f(g_triangles[i].uv[j].u, g_triangles[i].uv[j].v);
         glVertex3f(g_triangles[i].v[j].x, g_triangles[i].v[j].y,
@@ -310,25 +336,35 @@ void render_scene() {
       }
     }
     glEnd();
+
     if (g_has_painted_faces)
       glDisable(GL_COLOR_MATERIAL);
     if (g_texture_loaded)
       glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
     glDisable(GL_LIGHTING);
-  } else {
+  }
+  else
+  {
+    // O placeholder também responde às transformações para permitir testar os
+    // controles antes de importar um STL.
+    glPushMatrix();
+    apply_model_transform();
     glColor3f(0.4f, 0.4f, 0.6f);
     glutWireTeapot(1.0);
+    glPopMatrix();
   }
 
-  glPopMatrix();
-
-  if (g_showcase_active) {
+  if (g_showcase_active)
+  {
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glColor3f(0.2f, 0.4f, 1.0f);
     glLineWidth(2.5f);
     glBegin(GL_LINE_STRIP);
-    for (int i = 0; i <= 100; i++) {
+    for (int i = 0; i <= 100; i++)
+    {
       float t = i / 100.0f;
       Vec3 p = eval_showcase_spline(t);
       glVertex3f(p.x, p.y, p.z);
