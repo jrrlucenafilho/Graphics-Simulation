@@ -183,6 +183,29 @@ void center_model() {
   }
 }
 
+void orient_model() {
+  // Arquivos STL (CAD/impressao 3D) usam Z como eixo vertical. A cena usa Y.
+  // Rotaciona o modelo -90 graus ao redor de X: leva Z para Y (modelo em pe) e
+  // a frente do modelo (que no arquivo aponta para -Y) para o eixo +Z (camera).
+  // Aplica-se aos vertices e tambem as normais, para manter a iluminacao.
+  for (size_t i = 0; i < g_triangles.size(); i++) {
+    for (int j = 0; j < 3; j++) {
+      float x = g_triangles[i].v[j].x;
+      float y = g_triangles[i].v[j].y;
+      float z = g_triangles[i].v[j].z;
+      g_triangles[i].v[j].x = x;
+      g_triangles[i].v[j].y = z;
+      g_triangles[i].v[j].z = -y;
+    }
+    float nx = g_triangles[i].normal.x;
+    float ny = g_triangles[i].normal.y;
+    float nz = g_triangles[i].normal.z;
+    g_triangles[i].normal.x = nx;
+    g_triangles[i].normal.y = nz;
+    g_triangles[i].normal.z = -ny;
+  }
+}
+
 void generate_uv_coords() {
   if (g_triangles.empty())
     return;

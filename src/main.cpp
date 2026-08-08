@@ -67,6 +67,7 @@ static void mouse(int button, int state, int x, int y) {
       std::string path = open_file_dialog();
       if (!path.empty()) {
         if (load_stl(path)) {
+          orient_model();
           center_model();
           generate_uv_coords();
           printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
@@ -194,6 +195,7 @@ static void keyboard(unsigned char key, int, int) {
     std::string path = open_file_dialog();
     if (!path.empty()) {
       if (load_stl(path)) {
+        orient_model();
         center_model();
         generate_uv_coords();
         printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
@@ -272,6 +274,7 @@ int main(int argc, char **argv) {
 
   if (argc > 1) {
     if (load_stl(argv[1])) {
+      orient_model();
       center_model();
       generate_uv_coords();
       printf("Modelo carregado: %s (%zu triangulos)\n", argv[1],
