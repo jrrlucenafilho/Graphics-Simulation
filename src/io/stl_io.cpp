@@ -3,6 +3,17 @@
 #include <cstdio>
 #include <fstream>
 
+// ---------------------------------------------------------------------------
+// STL é um formato de malha triangular. Há duas variantes:
+//   - ASCII:  texto com blocos "facet normal ... outer loop / vertex ..."
+//   - Binária: cabeçalho de 80 bytes + contagem de triângulos (4 bytes) +
+//              triângulos de 50 bytes cada (normal 3 floats, 3 vértices de
+//              3 floats e 2 bytes de atributo).
+// O carregador detecta a variante e chama a rotina correspondente.
+// ---------------------------------------------------------------------------
+
+// Lê um arquivo STL em formato ASCII, construindo a lista de triângulos.
+// Linhas são limpas (tabs, CR e espaços duplicados) para robustez na leitura.
 static bool load_stl_ascii(const std::string &path) {
   std::ifstream f(path.c_str());
   if (!f)
@@ -23,6 +34,7 @@ static bool load_stl_ascii(const std::string &path) {
     while (!trim.empty() && trim.back() == ' ')
       trim.pop_back();
 
+    // Para cada bloco "facet", lê a normal (se houver) e os três vértices.
     if (trim.substr(0, 12) == "facet normal" || trim.substr(0, 5) == "facet") {
       Triangle tri;
       tri.normal = Vec3(0, 0, 0);
@@ -53,6 +65,9 @@ static bool load_stl_ascii(const std::string &path) {
   return facet_count > 0;
 }
 
+// Lê um arquivo STL binário. A estrutura fixa de cada triângulo é lida
+// diretamente para o struct Triangle; normais ausentes são corrigidas depois
+// em load_stl().
 static bool load_stl_binary(const std::string &path) {
   std::ifstream f(path.c_str(), std::ios::binary);
   if (!f)
@@ -76,6 +91,9 @@ static bool load_stl_binary(const std::string &path) {
   return !g_triangles.empty();
 }
 
+// Detecta se o arquivo é STL ASCII: deve começar com "solid" e, nas linhas
+// seguintes, conter "facet" ou "vertex". Isso evita interpretar um binário
+// que por acaso comece com "solid".
 static bool is_ascii_stl(const std::string &path) {
   std::ifstream f(path.c_str());
   if (!f)
@@ -98,6 +116,9 @@ static bool is_ascii_stl(const std::string &path) {
   return false;
 }
 
+// Ponto de entrada do carregamento: limpa a malha anterior, detecta o formato
+// e delega para o leitor adequado. Se o arquivo não possuir normais válidas,
+// recalcula-as a partir do produto vetorial das arestas do triângulo.
 bool load_stl(const std::string &path) {
   g_triangles.clear();
   g_model_loaded = false;
@@ -115,6 +136,8 @@ bool load_stl(const std::string &path) {
 
   if (ok) {
     for (size_t i = 0; i < g_triangles.size(); i++) {
+      // Se a normal não foi fornecida, calcula a partir das arestas do
+      // triângulo (e1 x e2) e normaliza.
       if (g_triangles[i].normal.length() < 1e-6f) {
         Vec3 e1 = g_triangles[i].v[1] - g_triangles[i].v[0];
         Vec3 e2 = g_triangles[i].v[2] - g_triangles[i].v[0];
@@ -128,12 +151,13 @@ bool load_stl(const std::string &path) {
   return ok;
 }
 
+// Exporta a malha atual para um arquivo STL ASCII.
+// Aplica a escala atual (feita via matriz na renderização) aos vértices
+// exportados, para que o arquivo reflita o modelo como exibido na tela.
 bool export_stl_ascii(const std::string &path) {
   std::ofstream f(path.c_str());
   if (!f)
     return false;
-  // Aplica a escala atual (feita via matriz na renderização) aos vértices
-  // exportados, para que o arquivo reflita o modelo como exibido na tela.
   f << "solid exported\n";
   for (size_t i = 0; i < g_triangles.size(); i++) {
     Vec3 v[3];
@@ -155,6 +179,10 @@ bool export_stl_ascii(const std::string &path) {
   return true;
 }
 
+// Centraliza o modelo na origem e o normaliza. Primeiro calcula a caixa
+// envolvente (bounding box) de todos os vértices, depois translada cada
+// vértice pelo centro e divide pelo maior eixo. Isso garante que qualquer
+// modelo, independente do tamanho original, ocupe uma área similar na tela.
 void center_model() {
   if (g_triangles.empty())
     return;
@@ -183,11 +211,12 @@ void center_model() {
   }
 }
 
+// Arquivos STL (CAD/impressão 3D) usam Z como eixo vertical, mas a cena usa Y.
+// Rotaciona o modelo -90 graus ao redor de X: leva Z para Y (modelo em pé) e a
+// frente do modelo (que no arquivo aponta para -Y) para o eixo +Z (em direção
+// à câmera). Aplica-se aos vértices e também às normais, para manter a
+// iluminação correta.
 void orient_model() {
-  // Arquivos STL (CAD/impressao 3D) usam Z como eixo vertical. A cena usa Y.
-  // Rotaciona o modelo -90 graus ao redor de X: leva Z para Y (modelo em pe) e
-  // a frente do modelo (que no arquivo aponta para -Y) para o eixo +Z (camera).
-  // Aplica-se aos vertices e tambem as normais, para manter a iluminacao.
   for (size_t i = 0; i < g_triangles.size(); i++) {
     for (int j = 0; j < 3; j++) {
       float x = g_triangles[i].v[j].x;
@@ -206,6 +235,10 @@ void orient_model() {
   }
 }
 
+// Gera coordenadas de textura (u, v) por vértice. As coordenadas são derivadas
+// da posição do vértice dentro da caixa envolvente do modelo, normalizadas
+// pelo maior eixo, o que mapeia a textura de forma estável sobre a superfície
+// independentemente da escala do modelo.
 void generate_uv_coords() {
   if (g_triangles.empty())
     return;

@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// Definições e declarações compartilhadas por todos os módulos do programa.
+// Este cabeçalho concentra apenas o que é usado em mais de uma unidade de
+// compilação: os tipos geométricos básicos e as variáveis globais da aplicação.
+
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -9,6 +13,10 @@
 #include <string>
 #include <vector>
 
+// Vetor 3D: representa posições, normais e deslocamentos no espaço. Os
+// operadores e métodos (soma, subtração, produto por escalar, produto
+// escalar, produto vetorial e normalização) simplificam a matemática vetorial
+// usada na renderização, na orientação dos modelos e na interação com o mouse.
 struct Vec3 {
   float x, y, z;
   Vec3() : x(0), y(0), z(0) {}
@@ -36,36 +44,60 @@ struct Vec3 {
   }
 };
 
+// Vetor 2D de coordenadas de textura (u, v) de um vértice do triângulo.
 struct Vec2 {
   float u, v;
   Vec2() : u(0), v(0) {}
   Vec2(float u, float v) : u(u), v(v) {}
 };
 
+// Triângulo da malha do modelo STL: normal da face (necessária para a
+// iluminação), os três vértices e as coordenadas de textura (UV) de cada
+// vértice (necessárias para aplicar uma textura sobre a superfície).
 struct Triangle {
   Vec3 normal, v[3];
   Vec2 uv[3];
 };
 
+// ---------------------------------------------------------------------------
+// Variáveis globais. Declaradas aqui com "extern" e definidas nos .cpp para
+// que qualquer módulo possa acessar o estado central da aplicação.
+// ---------------------------------------------------------------------------
+
+// Estado do modelo carregado: malha de triângulos e rotação atual da câmera.
 extern std::vector<Triangle> g_triangles;
 extern bool g_model_loaded;
 extern float g_rot_x, g_rot_y;
 
+// Estado da interação com o mouse: última posição, se há arrasto em andamento,
+// nível de zoom e tamanho atual da janela.
 extern int g_last_mx, g_last_my;
 extern bool g_dragging;
 extern float g_zoom;
 extern int g_win_w, g_win_h;
+
+// Estado de destaque (hover) dos botões da interface.
 extern bool g_import_hover;
 extern bool g_export_hover;
 extern bool g_texture_hover;
+
+// Estado da textura carregada.
 extern GLuint g_texture_id;
 extern bool g_texture_loaded;
+
+// Estado do modo vitrine (Showcase): câmera percorre uma curva em volta do
+// modelo automaticamente por alguns segundos.
 extern bool g_showcase_hover;
 extern bool g_showcase_active;
 extern float g_showcase_time;
 extern float g_showcase_duration;
+
+// Posições das luzes pontuais da cena e qual delas está selecionada para ser
+// arrastada com o mouse.
 extern std::vector<Vec3> g_lamp_positions;
 extern int g_selected_lamp;
+
+// Escala não uniforme (esticar/encolher) aplicada ao modelo em cada eixo.
 extern float g_scale_x, g_scale_y, g_scale_z;
 
 #endif

@@ -2,6 +2,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+// Executa o comando zenity via popen, que abre a janela de seleção nativa e
+// devolve o caminho escolhido na saída padrão. O caminho é lido, limpo de
+// quebras de linha e retornado; string vazia significa cancelamento.
+
 std::string open_file_dialog() {
   std::string cmd = "zenity --file-selection --title=\"Selecionar modelo STL\" "
                     "--file-filter=\"STL files (*.stl) | *.stl\" 2>/dev/null";
@@ -20,6 +24,8 @@ std::string open_file_dialog() {
   return "";
 }
 
+// Igual ao de abrir, porém com o modo "salvar" e um nome sugerido. Se o
+// usuário não digitar a extensão, ela é acrescentada automaticamente.
 std::string save_file_dialog() {
   std::string cmd =
       "zenity --file-selection --save --title=\"Exportar modelo STL\" "
@@ -42,6 +48,7 @@ std::string save_file_dialog() {
   return "";
 }
 
+// Diálogo de seleção de imagem (textura), filtrado para formatos comuns.
 std::string open_texture_dialog() {
   std::string cmd =
       "zenity --file-selection --title=\"Selecionar textura\" "

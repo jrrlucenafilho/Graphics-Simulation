@@ -2,7 +2,13 @@
 #include <cstdio>
 #include <cstring>
 
+// Desenha um botão 2D. A projeção é trocada temporariamente para ortográfica
+// (em pixels da janela) para que o desenho seja independente da câmera 3D;
+// depois a projeção original é restaurada. Composto por: fundo (quad), borda
+// (line loop) e rótulo (texto com glutBitmapCharacter).
 void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
+  // Projeção ortográfica cobrindo toda a janela, com origem no canto
+  // superior esquerdo (g_win_h no topo).
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -11,6 +17,7 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glPushMatrix();
   glLoadIdentity();
 
+  // Fundo do botão; cor mais clara quando o cursor está sobre ele (hover).
   if (hover) {
     glColor3f(0.3f, 0.6f, 1.0f);
   } else {
@@ -23,6 +30,7 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glVertex2i(x, y + h);
   glEnd();
 
+  // Borda branca ao redor do botão.
   glColor3f(1, 1, 1);
   glBegin(GL_LINE_LOOP);
   glVertex2i(x, y);
@@ -31,6 +39,7 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glVertex2i(x, y + h);
   glEnd();
 
+  // Rótulo centralizado aproximadamente (4px por caractere na fonte 8x13).
   glColor3f(1, 1, 1);
   int len = (int)strlen(label);
   glWindowPos2i(x + w / 2 - len * 4, g_win_h - (y + h / 2 + 4));
@@ -43,6 +52,10 @@ void draw_button(int x, int y, int w, int h, const char *label, bool hover) {
   glPopMatrix();
 }
 
+// Desenha a linha de informações no rodapé da janela: mostra o número de
+// triângulos do modelo carregado, as instruções de uso e os valores atuais de
+// escala de cada eixo. Também usa projeção ortográfica para ficar sempre
+// legível, independente da câmera.
 void draw_info_text() {
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
