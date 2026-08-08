@@ -27,12 +27,6 @@ bool g_texture_hover = false;
 GLuint g_texture_id = 0;
 bool g_texture_loaded = false;
 
-bool g_paint_mode = false;
-bool g_show_palette = false;
-Vec3 g_selected_color(1.0f, 0.0f, 0.0f);
-bool g_paint_hover = false;
-bool g_has_painted_faces = false;
-
 bool g_showcase_hover = false;
 bool g_showcase_active = false;
 float g_showcase_time = 0.0f;
@@ -64,55 +58,9 @@ static void mouse(int button, int state, int x, int y) {
   bool over_import = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   bool over_export = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
   bool over_texture = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
-  bool over_paint = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
-  bool over_showcase = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
+  bool over_showcase = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-    if (over_paint) {
-      g_showcase_active = false;
-      g_showcase_time = 0.0f;
-      if (g_paint_mode || g_show_palette) {
-        g_paint_mode = false;
-        g_show_palette = false;
-      } else {
-        g_show_palette = true;
-      }
-      printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
-      glutPostRedisplay();
-      return;
-    }
-
-    if (g_show_palette) {
-      int ss = 50, sp = 20;
-      int total_w = 3 * ss + 2 * sp;
-      int start_x = (g_win_w - total_w) / 2;
-      int pal_y = 100;
-      int sy = pal_y + 15;
-      if (y >= sy && y <= sy + ss) {
-        if (x >= start_x && x <= start_x + ss) {
-          g_selected_color = Vec3(1, 0, 0);
-          g_paint_mode = true;
-          printf("Cor selecionada: VERMELHO\n");
-          glutPostRedisplay();
-          return;
-        }
-        if (x >= start_x + ss + sp && x <= start_x + 2 * ss + sp) {
-          g_selected_color = Vec3(0, 1, 0);
-          g_paint_mode = true;
-          printf("Cor selecionada: VERDE\n");
-          glutPostRedisplay();
-          return;
-        }
-        if (x >= start_x + 2 * ss + 2 * sp && x <= start_x + 3 * ss + 2 * sp) {
-          g_selected_color = Vec3(0, 0, 1);
-          g_paint_mode = true;
-          printf("Cor selecionada: AZUL\n");
-          glutPostRedisplay();
-          return;
-        }
-      }
-    }
-
     if (over_import) {
       g_showcase_active = false;
       g_showcase_time = 0.0f;
@@ -121,9 +69,6 @@ static void mouse(int button, int state, int x, int y) {
         if (load_stl(path)) {
           center_model();
           generate_uv_coords();
-          g_paint_mode = false;
-          g_show_palette = false;
-          g_has_painted_faces = false;
           printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                  g_triangles.size());
         } else {
@@ -172,19 +117,6 @@ static void mouse(int button, int state, int x, int y) {
       return;
     }
 
-    if (g_paint_mode && g_model_loaded) {
-      g_dragging = true;
-      g_last_mx = x;
-      g_last_my = y;
-      int idx = pick_triangle(x, y);
-      if (idx >= 0) {
-        g_triangles[idx].color = g_selected_color;
-        g_has_painted_faces = true;
-        glutPostRedisplay();
-      }
-      return;
-    }
-
     int lamp_idx = pick_lamp(x, y);
     if (lamp_idx >= 0) {
       if (g_selected_lamp != lamp_idx) {
@@ -222,14 +154,7 @@ static void mouse(int button, int state, int x, int y) {
 
 static void motion(int x, int y) {
   if (g_dragging) {
-    if (g_paint_mode && g_model_loaded && !g_showcase_active) {
-      int idx = pick_triangle(x, y);
-      if (idx >= 0) {
-        g_triangles[idx].color = g_selected_color;
-        g_has_painted_faces = true;
-        glutPostRedisplay();
-      }
-    } else if (g_selected_lamp >= 0) {
+    if (g_selected_lamp >= 0) {
       Vec3 view_dir = get_view_direction();
       int idx = g_selected_lamp;
       Vec3 curr =
@@ -254,8 +179,7 @@ static void motion(int x, int y) {
   g_import_hover = (x >= 20 && x <= 140 && y >= 50 && y <= 85);
   g_export_hover = (x >= 150 && x <= 270 && y >= 50 && y <= 85);
   g_texture_hover = (x >= 280 && x <= 400 && y >= 50 && y <= 85);
-  g_paint_hover = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
-  g_showcase_hover = (x >= 540 && x <= 660 && y >= 50 && y <= 85);
+  g_showcase_hover = (x >= 410 && x <= 530 && y >= 50 && y <= 85);
   glutPostRedisplay();
 }
 
@@ -308,17 +232,6 @@ static void keyboard(unsigned char key, int, int) {
     }
     break;
   }
-  case 'p':
-  case 'P':
-    if (g_paint_mode || g_show_palette) {
-      g_paint_mode = false;
-      g_show_palette = false;
-    } else {
-      g_show_palette = true;
-    }
-    printf("Modo pintura: %s\n", g_paint_mode ? "ATIVO" : "INATIVO");
-    glutPostRedisplay();
-    break;
   case 's':
   case 'S':
     if (g_showcase_active) {

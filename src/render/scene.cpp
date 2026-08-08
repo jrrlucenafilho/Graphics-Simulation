@@ -290,16 +290,8 @@ void render_scene() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_spec);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shin);
 
-    if (g_has_painted_faces) {
-      glEnable(GL_COLOR_MATERIAL);
-      glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    }
-
     glBegin(GL_TRIANGLES);
     for (size_t i = 0; i < g_triangles.size(); i++) {
-      if (g_has_painted_faces)
-        glColor3f(g_triangles[i].color.x, g_triangles[i].color.y,
-                  g_triangles[i].color.z);
       glNormal3f(g_triangles[i].normal.x, g_triangles[i].normal.y,
                  g_triangles[i].normal.z);
       for (int j = 0; j < 3; j++) {
@@ -310,8 +302,6 @@ void render_scene() {
       }
     }
     glEnd();
-    if (g_has_painted_faces)
-      glDisable(GL_COLOR_MATERIAL);
     if (g_texture_loaded)
       glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -337,17 +327,12 @@ void render_scene() {
     glLineWidth(1.0f);
   }
 
-  if (g_show_palette)
-    draw_palette();
-
   draw_axes_indicator();
 
   draw_button(20, 50, 120, 35, "Importar", g_import_hover);
   draw_button(150, 50, 120, 35, "Exportar", g_export_hover);
   draw_button(280, 50, 120, 35, "Textura", g_texture_hover);
-  draw_button(410, 50, 120, 35, g_paint_mode ? "Pintar:ON" : "Pintar",
-              g_paint_hover);
-  draw_button(540, 50, 120, 35, g_showcase_active ? "Showcase:ON" : "Showcase",
+  draw_button(410, 50, 120, 35, g_showcase_active ? "Showcase:ON" : "Showcase",
               g_showcase_hover);
   draw_info_text();
 

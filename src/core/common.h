@@ -45,7 +45,6 @@ struct Vec2 {
 struct Triangle {
   Vec3 normal, v[3];
   Vec2 uv[3];
-  Vec3 color;
 };
 
 extern std::vector<Triangle> g_triangles;
@@ -61,11 +60,6 @@ extern bool g_export_hover;
 extern bool g_texture_hover;
 extern GLuint g_texture_id;
 extern bool g_texture_loaded;
-extern bool g_paint_mode;
-extern bool g_show_palette;
-extern Vec3 g_selected_color;
-extern bool g_paint_hover;
-extern bool g_has_painted_faces;
 extern bool g_showcase_hover;
 extern bool g_showcase_active;
 extern float g_showcase_time;

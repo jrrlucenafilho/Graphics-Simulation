@@ -122,10 +122,8 @@ bool load_stl(const std::string &path) {
         n.normalize();
         g_triangles[i].normal = n;
       }
-      g_triangles[i].color = Vec3(0.7f, 0.7f, 0.9f);
     }
     g_model_loaded = true;
-    g_has_painted_faces = false;
   }
   return ok;
 }
