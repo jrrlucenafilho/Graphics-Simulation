@@ -71,4 +71,3 @@ void draw_info_text() {
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
 }
-

@@ -199,21 +199,21 @@ static void draw_axes_indicator() {
 }
 
 static Vec3 catmull_rom(const Vec3 &p0, const Vec3 &p1, const Vec3 &p2,
-                         const Vec3 &p3, float t) {
+                        const Vec3 &p3, float t) {
   float t2 = t * t;
   float t3 = t2 * t;
-  return (p1 * 2.0f +
-          (p2 - p0) * t +
+  return (p1 * 2.0f + (p2 - p0) * t +
           (p0 * 2.0f - p1 * 5.0f + p2 * 4.0f - p3) * t2 +
-          (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) * 0.5f;
+          (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) *
+         0.5f;
 }
 
 static Vec3 eval_showcase_spline(float t) {
   static const Vec3 pts[] = {
-    Vec3(3.5f, 0.8f, 0.0f),  Vec3(2.5f, 1.5f, 2.5f),
-    Vec3(0.0f, 1.8f, 3.5f),  Vec3(-2.5f, 1.2f, 2.5f),
-    Vec3(-3.5f, 0.5f, 0.0f), Vec3(-2.5f, -0.2f, -2.5f),
-    Vec3(0.0f, -0.5f, -3.5f),Vec3(2.5f, 0.2f, -2.5f),
+      Vec3(3.5f, 0.8f, 0.0f),   Vec3(2.5f, 1.5f, 2.5f),
+      Vec3(0.0f, 1.8f, 3.5f),   Vec3(-2.5f, 1.2f, 2.5f),
+      Vec3(-3.5f, 0.5f, 0.0f),  Vec3(-2.5f, -0.2f, -2.5f),
+      Vec3(0.0f, -0.5f, -3.5f), Vec3(2.5f, 0.2f, -2.5f),
   };
   const int n = 8;
   float seg = t * n;

@@ -1,6 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include "texture.h"
+#include "stb_image.h"
 #include <cstdio>
 
 bool load_texture(const std::string &path) {

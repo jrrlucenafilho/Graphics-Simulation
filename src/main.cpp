@@ -1,10 +1,10 @@
 #include "core/common.h"
 #include "core/transform.h"
-#include "io/file_dialog.h"
 #include "interaction/interaction.h"
-#include "render/scene.h"
+#include "io/file_dialog.h"
 #include "io/stl_io.h"
 #include "io/texture.h"
+#include "render/scene.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -158,8 +158,7 @@ static void motion(int x, int y) {
     if (g_selected_lamp >= 0) {
       Vec3 view_dir = get_view_direction();
       int idx = g_selected_lamp;
-      Vec3 curr =
-          mouse_to_3d_plane(x, y, view_dir, g_lamp_positions[idx]);
+      Vec3 curr = mouse_to_3d_plane(x, y, view_dir, g_lamp_positions[idx]);
       Vec3 prev = mouse_to_3d_plane(g_last_mx, g_last_my, view_dir,
                                     g_lamp_positions[idx]);
       g_lamp_positions[idx] = g_lamp_positions[idx] + (curr - prev);

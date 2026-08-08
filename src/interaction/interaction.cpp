@@ -36,7 +36,7 @@ Vec3 get_view_direction() {
 }
 
 Vec3 mouse_to_3d_plane(int mx, int my, const Vec3 &plane_normal,
-                        const Vec3 &plane_pt) {
+                       const Vec3 &plane_pt) {
   GLint viewport[4];
   GLdouble mv[16], proj[16];
   glGetIntegerv(GL_VIEWPORT, viewport);
