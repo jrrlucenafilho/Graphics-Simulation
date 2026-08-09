@@ -1,71 +1,11 @@
 #include "interaction.hpp"
-#include "core/transform.hpp"
 #include <cmath>
 
-static bool ray_triangle_intersect(const Vec3 &orig, const Vec3 &dir,
-                                   const Triangle &tri, float &t)
-{
-  const float EPS = 1e-6f;
-  Vec3 e1 = tri.v[1] - tri.v[0];
-  Vec3 e2 = tri.v[2] - tri.v[0];
-  Vec3 pvec = dir.cross(e2);
-  float det = e1.dot(pvec);
-  if (std::abs(det) < EPS)
-    return false;
-  float inv_det = 1.0f / det;
-  Vec3 tvec = orig - tri.v[0];
-  float u = tvec.dot(pvec) * inv_det;
-  if (u < 0 || u > 1)
-    return false;
-  Vec3 qvec = tvec.cross(e1);
-  float v = dir.dot(qvec) * inv_det;
-  if (v < 0 || u + v > 1)
-    return false;
-  t = e2.dot(qvec) * inv_det;
-  return t > 0;
-}
-
-int pick_triangle(int mx, int my)
-{
-  GLint viewport[4];
-  GLdouble mv[16], proj[16];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
-  glGetDoublev(GL_PROJECTION_MATRIX, proj);
-
-  double nx, ny, nz, fx, fy, fz;
-  gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
-  gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
-
-  // gluUnProject fornece o raio no espaço da cena. Como o STL é desenhado
-  // com translação, rotação e escala próprias, levamos os dois pontos para o
-  // espaço local do modelo usando a transformação inversa.
-  Vec3 near_world(nx, ny, nz);
-  Vec3 far_world(fx, fy, fz);
-  Vec3 orig = inverse_transform_point(near_world);
-  Vec3 far_local = inverse_transform_point(far_world);
-  Vec3 dir = far_local - orig;
-  dir.normalize();
-
-  float closest = 1e10f;
-  int hit = -1;
-  for (size_t i = 0; i < g_triangles.size(); i++)
-  {
-    float t;
-    if (ray_triangle_intersect(orig, dir, g_triangles[i], t))
-    {
-      if (t < closest)
-      {
-        closest = t;
-        hit = (int)i;
-      }
-    }
-  }
-  return hit;
-}
-
-int pick_lamp(int mx, int my)
-{
+// Seleciona a lâmpada mais próxima do cursor. Cada lâmpada é projetada da
+// posição 3D para a tela com gluProject; a mais próxima dentro de um raio de
+// tolerância (best_dist) é retornada. Lâmpadas atrás da câmera (sz fora de
+// [0,1]) são ignoradas.
+int pick_lamp(int mx, int my) {
   GLint viewport[4];
   GLdouble mv[16], proj[16];
   glGetIntegerv(GL_VIEWPORT, viewport);
@@ -76,16 +16,18 @@ int pick_lamp(int mx, int my)
   float best_dist = 25.0f;
   int best_idx = -1;
 
-  for (size_t i = 0; i < g_lamp_positions.size(); i++)
-  {
+  for (size_t i = 0; i < g_lamp_positions.size(); i++) {
+    // Projeta a posição 3D da lâmpada em coordenadas de tela.
     gluProject(g_lamp_positions[i].x, g_lamp_positions[i].y,
                g_lamp_positions[i].z, mv, proj, viewport, &sx, &sy, &sz);
     if (sz < 0.0 || sz >= 1.0)
       continue;
-    float d = sqrtf((mx - sx) * (mx - sx) +
-                    ((viewport[3] - my) - sy) * ((viewport[3] - my) - sy));
-    if (d < best_dist)
-    {
+    // Distância euclidiana na tela (lembrando que a origem da tela em Y é
+    // invertida em relação ao OpenGL).
+    float dx = (float)mx - (float)sx;
+    float dy = (float)(viewport[3] - my) - (float)sy;
+    float d = std::sqrt(dx * dx + dy * dy);
+    if (d < best_dist) {
       best_dist = d;
       best_idx = (int)i;
     }
@@ -93,34 +35,44 @@ int pick_lamp(int mx, int my)
   return best_idx;
 }
 
-Vec3 get_view_direction()
-{
+// Extrai a direção de visão da matriz modelview. A terceira coluna da matriz
+// contém a direção Z da câmera; negada, aponta de volta ao mundo. Isso é usado
+// para arrastar as lâmpadas no plano perpendicular à câmera.
+Vec3 get_view_direction() {
   GLdouble mv[16];
   glGetDoublev(GL_MODELVIEW_MATRIX, mv);
-  Vec3 d(-mv[2], -mv[6], -mv[10]);
+  Vec3 d(-(float)mv[2], -(float)mv[6], -(float)mv[10]);
   d.normalize();
   return d;
 }
 
+// Converte o mouse em um ponto 3D sobre um plano arbitrário: dispara um raio
+// da câmera pelo pixel (gluUnProject nos planos near e far) e intersecta esse
+// raio com o plano dado (equação paramétrica do plano via produto escalar).
+// O resultado permite arrastar objetos mantendo-os sobre o plano do olhar.
 Vec3 mouse_to_3d_plane(int mx, int my, const Vec3 &plane_normal,
-                       const Vec3 &plane_pt)
-{
+                       const Vec3 &plane_pt) {
   GLint viewport[4];
   GLdouble mv[16], proj[16];
   glGetIntegerv(GL_VIEWPORT, viewport);
   glGetDoublev(GL_MODELVIEW_MATRIX, mv);
   glGetDoublev(GL_PROJECTION_MATRIX, proj);
 
+  // Desprojeta o pixel nos planos de recorte próximo (near) e distante (far);
+  // o segmento entre esses dois pontos define o raio de visão.
   double nx, ny, nz, fx, fy, fz;
   gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
   gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
 
-  Vec3 orig(nx, ny, nz);
-  Vec3 dir(fx - nx, fy - ny, fz - nz);
+  // gluUnProject devolve doubles; os valores são convertidos para float ao
+  // montar os vetores de trabalho da interseção.
+  Vec3 orig((float)nx, (float)ny, (float)nz);
+  Vec3 dir((float)(fx - nx), (float)(fy - ny), (float)(fz - nz));
   dir.normalize();
 
+  // Interseção raio-plano: t = (pt - orig) . normal / (dir . normal).
   float denom = dir.dot(plane_normal);
-  if (fabs(denom) < 1e-6f)
+  if (std::abs(denom) < 1e-6f)
     return plane_pt;
   float d = (plane_pt - orig).dot(plane_normal) / denom;
   return orig + dir * d;
