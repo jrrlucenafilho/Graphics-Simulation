@@ -219,21 +219,23 @@ static void draw_axes_indicator() {
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
-// Interpolação de Catmull-Rom: curva suave que passa por todos os pontos de
-// controle, usada para o trajeto da câmera no modo vitrine.
-static Vec3 catmull_rom(const Vec3 &p0, const Vec3 &p1, const Vec3 &p2,
-                        const Vec3 &p3, float t) {
+// Ponto de uma curva de Bézier cúbica, avaliado em t em [0,1] a partir dos
+// quatro pontos de controle (b0, b1, b2, b3).
+static Vec3 bezier_point(const Vec3 &b0, const Vec3 &b1, const Vec3 &b2,
+                         const Vec3 &b3, float t) {
+  float u = 1.0f - t;
+  float u2 = u * u;
+  float u3 = u2 * u;
   float t2 = t * t;
   float t3 = t2 * t;
-  return (p1 * 2.0f + (p2 - p0) * t +
-          (p0 * 2.0f - p1 * 5.0f + p2 * 4.0f - p3) * t2 +
-          (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) *
-         0.5f;
+  return b0 * u3 + b1 * (3.0f * u2 * t) + b2 * (3.0f * u * t2) + b3 * t3;
 }
 
 // Avalia a posição da câmera na curva da vitrine para o instante t em [0,1].
-// Os 8 pontos de controle formam um anel ao redor do modelo; a curva é
-// fechada (índices com módulo), garantindo um trajeto contínuo.
+// Os 8 pontos de controle formam um anel ao redor do modelo; cada par de
+// pontos consecutivos vira um segmento de Bézier cúbico, com as tangentes
+// estimadas a partir dos pontos vizinhos (conversão de Hermite para Bézier).
+// O resultado é uma curva fechada com continuidade C1 ao longo do trajeto.
 static Vec3 eval_showcase_spline(float t) {
   static const Vec3 pts[] = {
       Vec3(3.5f, 0.8f, 0.0f),   Vec3(2.5f, 1.5f, 2.5f),
@@ -246,11 +248,17 @@ static Vec3 eval_showcase_spline(float t) {
   int idx = (int)seg;
   float frac = seg - idx;
   idx = idx % n;
-  const Vec3 &p0 = pts[(idx - 1 + n) % n];
-  const Vec3 &p1 = pts[idx];
-  const Vec3 &p2 = pts[(idx + 1) % n];
-  const Vec3 &p3 = pts[(idx + 2) % n];
-  return catmull_rom(p0, p1, p2, p3, frac);
+  const Vec3 &p0 = pts[idx];
+  const Vec3 &p1 = pts[(idx + 1) % n];
+  // Tangentes nos pontos p0 e p1 (estimadas como Catmull-Rom) e conversão
+  // Hermite -> Bézier: cada tangente vira um ponto de controle a 1/3 do trecho.
+  Vec3 tangent0 = (pts[(idx + 1) % n] - pts[(idx - 1 + n) % n]) * 0.5f;
+  Vec3 tangent1 = (pts[(idx + 2) % n] - pts[idx]) * 0.5f;
+  Vec3 b0 = p0;
+  Vec3 b1 = p0 + tangent0 * (1.0f / 3.0f);
+  Vec3 b2 = p1 - tangent1 * (1.0f / 3.0f);
+  Vec3 b3 = p1;
+  return bezier_point(b0, b1, b2, b3, frac);
 }
 
 // Função principal de renderização (callback display). Ordem de desenho:
