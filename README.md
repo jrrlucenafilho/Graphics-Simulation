@@ -161,7 +161,7 @@ Graphics-Simulation/
 - **Ordem de renderização e depth mask da interface 2D**: a interface (botões, textos) era encoberta (ou encobria incorretamente) elementos 3D da cena; foi necessário desativar o depth test/depth mask ao desenhar a UI e ajustar a ordem de desenho.
 - **Suporte aos dois formatos de STL**: arquivos STL podem ser ASCII ou binários, com variações de formatação (espaços, tabs, `\r`); o parser precisou tratar os dois casos e normalizar as linhas.
 - **Picking em 3D**: converter a posição do mouse (2D) em um raio no espaço da cena com `gluUnProject`, usado para arrastar as lâmpadas em um plano paralelo à câmera.
-- **Manuseio da luzes em 3D*: Maneira para manusear as luzes de maneira mais dinâmica, sem depender tanto da perspectiva da câmera.
+- **Manuseio da luzes em 3D**: Maneira para manusear as luzes de maneira mais dinâmica, sem depender tanto da perspectiva da câmera.
 
 ---
 
