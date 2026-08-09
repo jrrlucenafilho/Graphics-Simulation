@@ -10,13 +10,13 @@
 // Os callbacks (mouse, motion, keyboard, idle, display) mantêm o estado global
 // da aplicação, definido em core/common.h e iniciado aqui.
 
-#include "core/common.h"
-#include "core/transform.h"
-#include "interaction/interaction.h"
-#include "io/file_dialog.h"
-#include "io/stl_io.h"
-#include "io/texture.h"
-#include "render/scene.h"
+#include "core/common.hpp"
+#include "core/transform.hpp"
+#include "interaction/interaction.hpp"
+#include "io/file_dialog.hpp"
+#include "io/stl_io.hpp"
+#include "io/texture.hpp"
+#include "render/scene.hpp"
 #include <cstdio>
 #include <cstdlib>
 

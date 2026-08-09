@@ -1,5 +1,5 @@
-#include "stl_io.h"
-#include "texture.h"
+#include "stl_io.hpp"
+#include "texture.hpp"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>

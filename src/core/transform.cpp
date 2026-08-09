@@ -1,5 +1,5 @@
-#include "transform.h"
-#include "core/common.h"
+#include "transform.hpp"
+#include "core/common.hpp"
 #include <cstdio>
 
 // Definição das variáveis globais de escala (declaradas como extern em common.h).

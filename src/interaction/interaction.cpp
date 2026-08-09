@@ -1,4 +1,4 @@
-#include "interaction.h"
+#include "interaction.hpp"
 #include <cmath>
 
 // Seleciona a lâmpada mais próxima do cursor. Cada lâmpada é projetada da

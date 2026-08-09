@@ -1,6 +1,6 @@
-#include "scene.h"
-#include "core/common.h"
-#include "ui.h"
+#include "scene.hpp"
+#include "core/common.hpp"
+#include "ui.hpp"
 #include <cstdio>
 
 // Desenha o chão da cena: uma grade de linhas no plano Y=0 (XZ) que serve de
