@@ -43,7 +43,7 @@ O programa é um **visualizador 3D de modelos STL/OBJ** escrito em C++ com **Ope
 
 **Translação em Eixo:**
 
-![Translação](/docs/showcase.gif)
+![Translação](/docs/translate.gif)
 
 **Aplicação de Textura:**
 
