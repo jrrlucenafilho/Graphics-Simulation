@@ -13,7 +13,7 @@ O programa é um **visualizador 3D de modelos STL/OBJ** escrito em C++ com **Ope
 - **Exportar o modelo** carregado: STL ASCII quando não há textura, ou OBJ com arquivo `.mtl` e a textura copiada ao lado quando há textura aplicada.
 - **Aplicar texturas** a partir de qualquer imagem (JPG/PNG), carregada com a biblioteca `stb_image` e aplicada ao modelo junto com a iluminação.
 - **Manipular duas fontes de luz** (`GL_LIGHT0` e `GL_LIGHT1`), desenhadas na cena como esferas em wireframe. Clicar em uma lâmpada a seleciona (exibindo eixos XYZ como gizmo) e arrastá-la move a luz em 3D — a iluminação do modelo é atualizada em tempo real.
-- **Esticar o objeto (escala não uniforme)**: as teclas `X/x`, `Y/y` e `Z/z` esticam ou encolhem o modelo em cada eixo independentemente. A transformação é feita com **matrizes de transformação** (`glScalef` entre `glPushMatrix`/`glPopMatrix`), sem alterar a geometria em memória; `GL_NORMALIZE` mantém a iluminação correta sob escala não uniforme, e a exportação aplica a escala atual aos vértices salvos.
+- **Transformar o modelo (translação, rotação e escala não uniforme)**: as teclas `1` (mover), `2` (girar) e `3` (esticar) selecionam o modo de transformação; as **setas** alteram os eixos X/Y e **Page Up/Page Down** o eixo Z no modo ativo; `R` restaura o modelo ao estado original. As teclas `X/x`, `Y/y` e `Z/z` esticam ou encolhem o modelo em cada eixo diretamente. A transformação é feita com **matrizes de transformação** (`apply_model_transform()` entre `glPushMatrix`/`glPopMatrix`), sem alterar a geometria em memória; `GL_NORMALIZE` mantém a iluminação correta sob escala não uniforme, e a exportação aplica a escala atual aos vértices salvos.
 - **Modo Showcase**: a câmera percorre automaticamente, durante 8 segundos, uma trajetória fechada ao redor do modelo definida por segmentos de **curvas de Bézier cúbicas** (8 pontos de controle formando um anel, com continuidade C1 obtida pela conversão de Hermite para Bézier). A curva também é desenhada na cena.
 - **Cena auxiliar**: grid no chão, indicador de eixos em miniatura no canto da tela e barra de botões clicáveis com efeito de hover (Importar, Exportar, Textura, Showcase).
 
@@ -116,6 +116,10 @@ Há modelos STL de exemplo em `models/` e imagens de textura em `textures/`.
 | Exportar modelo (STL ASCII ou OBJ) | botão **Exportar** ou tecla `E` |
 | Carregar textura (JPG/PNG) | botão **Textura** ou tecla `T` |
 | Ativar/desativar modo Showcase | botão **Showcase** ou tecla `S` |
+| Selecionar modo de transformação | `1` (mover), `2` (girar), `3` (esticar) |
+| Mover/girar/esticar eixos X/Y | setas (esquerda/direita/baixo/cima) |
+| Mover/girar/esticar eixo Z | `Page Up` / `Page Down` |
+| Restaurar transformações do modelo | tecla `R` |
 | Esticar/encolher o objeto no eixo X | teclas `X` (estica) / `x` (encolhe) |
 | Esticar/encolher o objeto no eixo Y | teclas `Y` (estica) / `y` (encolhe) |
 | Esticar/encolher o objeto no eixo Z | teclas `Z` (estica) / `z` (encolhe) |
@@ -134,7 +138,7 @@ Graphics-Simulation/
 │   ├── main.cpp                     # Entry point + GLUT callbacks
 │   ├── core/
 │   │   ├── common.hpp               # Vec3, Vec2, Triangle + globals
-│   │   └── transform.hpp/cpp        # Escala não uniforme (esticar por eixo)
+│   │   └── transform.hpp/cpp        # Translação, rotação e escala não uniforme
 │   ├── io/                          # Operações de entrada/saída
 │   │   ├── file_dialog.hpp/cpp      # Janelas de diálogo (zenity)
 │   │   ├── stl_io.hpp/cpp           # Load/save STL/OBJ, centralizar, UV

@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef COMMON_HPP
+#define COMMON_HPP
 
 // Definições e declarações compartilhadas por todos os módulos do programa.
 // Este cabeçalho concentra apenas o que é usado em mais de uma unidade de
@@ -99,7 +99,11 @@ extern float g_showcase_duration;
 extern std::vector<Vec3> g_lamp_positions;
 extern int g_selected_lamp;
 
-// Escala não uniforme (esticar/encolher) aplicada ao modelo em cada eixo.
+// Transformações do modelo (translação, rotação e escala não uniforme)
+// aplicadas na renderização via matriz de transformação; a geometria em
+// memória não é alterada.
+extern float g_translate_x, g_translate_y, g_translate_z;
+extern float g_model_rot_x, g_model_rot_y, g_model_rot_z;
 extern float g_scale_x, g_scale_y, g_scale_z;
 
 #endif

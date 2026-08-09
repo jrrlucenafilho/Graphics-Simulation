@@ -1,5 +1,6 @@
 #include "scene.hpp"
 #include "core/common.hpp"
+#include "core/transform.hpp"
 #include "ui.hpp"
 #include <cstdio>
 
@@ -297,10 +298,11 @@ void render_scene() {
   if (g_selected_lamp >= 0)
     draw_axes_at(g_lamp_positions[g_selected_lamp]);
 
-  // Escala não uniforme via matriz de transformação; GL_NORMALIZE (habilitado
-  // no init) mantém as normais unitárias para a iluminação.
+  // Transformações do modelo (translação, rotação e escala não uniforme) via
+  // matriz de transformação; GL_NORMALIZE (habilitado no init) mantém as
+  // normais unitárias para a iluminação.
   glPushMatrix();
-  glScalef(g_scale_x, g_scale_y, g_scale_z);
+  apply_model_transform();
 
   if (g_model_loaded) {
     // Habilita iluminação com duas luzes posicionadas nas lâmpadas da cena.
