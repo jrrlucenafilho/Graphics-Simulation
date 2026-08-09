@@ -109,15 +109,15 @@ static bool is_ascii_stl(const std::string &path) {
     return false;
   std::string first;
   std::getline(f, first);
-  for (char &c : first)
-    c = (char)tolower(c);
+  std::transform(first.begin(), first.end(), first.begin(),
+                 [](unsigned char c) { return (char)tolower(c); });
   if (first.find("solid") == std::string::npos)
     return false;
   for (int i = 0; i < 10; i++) {
     std::string l;
     std::getline(f, l);
-    for (char &c : l)
-      c = (char)tolower(c);
+    std::transform(l.begin(), l.end(), l.begin(),
+                   [](unsigned char c) { return (char)tolower(c); });
     if (l.find("facet") != std::string::npos ||
         l.find("vertex") != std::string::npos)
       return true;
@@ -321,7 +321,7 @@ bool load_obj(const std::string &path) {
       }
       // Triangulação em leque a partir do primeiro vértice da face.
       for (size_t i = 1; i + 1 < fv.size(); i++) {
-        int order[3] = {0, (int)i, (int)i + 1};
+        const int order[3] = {0, (int)i, (int)i + 1};
         Triangle tri;
         bool has_normal = false;
         for (int k = 0; k < 3; k++) {
@@ -539,17 +539,13 @@ void center_model() {
 void orient_model() {
   for (size_t i = 0; i < g_triangles.size(); i++) {
     for (int j = 0; j < 3; j++) {
-      float x = g_triangles[i].v[j].x;
       float y = g_triangles[i].v[j].y;
       float z = g_triangles[i].v[j].z;
-      g_triangles[i].v[j].x = x;
       g_triangles[i].v[j].y = z;
       g_triangles[i].v[j].z = -y;
     }
-    float nx = g_triangles[i].normal.x;
     float ny = g_triangles[i].normal.y;
     float nz = g_triangles[i].normal.z;
-    g_triangles[i].normal.x = nx;
     g_triangles[i].normal.y = nz;
     g_triangles[i].normal.z = -ny;
   }

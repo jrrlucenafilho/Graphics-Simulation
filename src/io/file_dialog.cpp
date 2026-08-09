@@ -1,6 +1,5 @@
 #include "file_dialog.hpp"
 #include <cstdio>
-#include <cstdlib>
 
 // Executa o comando zenity via popen, que abre a janela de seleção nativa e
 // devolve o caminho escolhido na saída padrão. O caminho é lido, limpo de
