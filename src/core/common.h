@@ -81,9 +81,11 @@ extern bool g_import_hover;
 extern bool g_export_hover;
 extern bool g_texture_hover;
 
-// Estado da textura carregada.
+// Estado da textura carregada (identificador GL e caminho do arquivo de
+// origem, usado para referenciá-la na exportação OBJ/MTL).
 extern GLuint g_texture_id;
 extern bool g_texture_loaded;
+extern std::string g_texture_path;
 
 // Estado do modo vitrine (Showcase): câmera percorre uma curva em volta do
 // modelo automaticamente por alguns segundos.

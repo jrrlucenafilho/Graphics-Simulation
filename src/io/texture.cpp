@@ -37,6 +37,7 @@ bool load_texture(const std::string &path) {
 
   stbi_image_free(data);
   g_texture_loaded = true;
+  g_texture_path = path;
   printf("Textura carregada: %s (%dx%d)\n", path.c_str(), w, h);
   return true;
 }

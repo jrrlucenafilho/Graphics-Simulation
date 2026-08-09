@@ -49,6 +49,7 @@ bool g_texture_hover = false;
 // Textura carregada para aplicar sobre o modelo.
 GLuint g_texture_id = 0;
 bool g_texture_loaded = false;
+std::string g_texture_path;
 
 // Modo vitrine: a câmera percorre uma curva ao redor do modelo durante
 // g_showcase_duration segundos, e o temporizador avança no callback idle.
@@ -64,6 +65,24 @@ int g_selected_lamp = -1;
 // ---------------------------------------------------------------------------
 // Callbacks do GLUT
 // ---------------------------------------------------------------------------
+
+// Exporta o modelo atual. Quando há textura carregada, usa o formato OBJ
+// (que preserva a textura via arquivo .mtl); caso contrário, exporta STL
+// (formato apenas geométrico).
+static void export_model() {
+  if (!g_model_loaded) {
+    printf("Nenhum modelo para exportar.\n");
+    return;
+  }
+  std::string path = save_file_dialog(g_texture_loaded);
+  if (path.empty())
+    return;
+  bool ok = g_texture_loaded ? export_obj(path) : export_stl_ascii(path);
+  if (ok)
+    printf("Modelo exportado: %s\n", path.c_str());
+  else
+    printf("Erro ao exportar.\n");
+}
 
 // Chamado quando a janela precisa ser redesenhada: apenas invoca a
 // renderização da cena (definida em render/scene.cpp).
@@ -104,16 +123,15 @@ static void mouse(int button, int state, int x, int y) {
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
     if (over_import) {
-      // Interrompe a vitrine e abre o diálogo para escolher um STL. Após
-      // carregar, orienta, centraliza e gera UVs para a textura.
+      // Interrompe a vitrine e abre o diálogo para escolher um modelo (STL ou
+      // OBJ). O carregamento (pela extensão) já orienta o modelo conforme o
+      // formato e gera/usa coordenadas de textura; aqui só centraliza.
       g_showcase_active = false;
       g_showcase_time = 0.0f;
       std::string path = open_file_dialog();
       if (!path.empty()) {
-        if (load_stl(path)) {
-          orient_model();
+        if (load_model(path)) {
           center_model();
-          generate_uv_coords();
           printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                  g_triangles.size());
         } else {
@@ -123,19 +141,8 @@ static void mouse(int button, int state, int x, int y) {
       return;
     }
     if (over_export) {
-      // Exporta a malha atual como STL ASCII com a escala aplicada.
-      if (!g_model_loaded) {
-        printf("Nenhum modelo para exportar.\n");
-        return;
-      }
-      std::string path = save_file_dialog();
-      if (!path.empty()) {
-        if (export_stl_ascii(path)) {
-          printf("Modelo exportado: %s\n", path.c_str());
-        } else {
-          printf("Erro ao exportar.\n");
-        }
-      }
+      // Exporta a malha atual (OBJ com textura ou STL, conforme o caso).
+      export_model();
       return;
     }
     if (over_texture) {
@@ -199,11 +206,13 @@ static void mouse(int button, int state, int x, int y) {
   }
 
   // Roda do mouse: botão 3 (scroll para cima) aumenta o zoom, botão 4 reduz.
+  // O limite mínimo de g_zoom define o afastamento máximo da câmera; com
+  // -1.4 a distância máxima de zoom out é o dobro da anterior (8.5 -> 17.0).
   if (button == 3) {
     g_zoom = std::min(g_zoom + 0.1f, 3.0f);
   }
   if (button == 4) {
-    g_zoom = std::max(g_zoom - 0.1f, 0.3f);
+    g_zoom = std::max(g_zoom - 0.1f, -1.4f);
   }
   glutPostRedisplay();
 }
@@ -260,10 +269,8 @@ static void keyboard(unsigned char key, int, int) {
     g_showcase_time = 0.0f;
     std::string path = open_file_dialog();
     if (!path.empty()) {
-      if (load_stl(path)) {
-        orient_model();
+      if (load_model(path)) {
         center_model();
-        generate_uv_coords();
         printf("Modelo carregado: %s (%zu triangulos)\n", path.c_str(),
                g_triangles.size());
       } else {
@@ -273,21 +280,10 @@ static void keyboard(unsigned char key, int, int) {
     break;
   }
   case 'e':
-  case 'E': {
-    // Exportar modelo atual.
-    if (!g_model_loaded) {
-      printf("Nenhum modelo.\n");
-      break;
-    }
-    std::string path = save_file_dialog();
-    if (!path.empty()) {
-      if (export_stl_ascii(path))
-        printf("Exportado: %s\n", path.c_str());
-      else
-        printf("Erro ao exportar.\n");
-    }
+  case 'E':
+    // Exportar modelo atual (OBJ com textura ou STL, conforme o caso).
+    export_model();
     break;
-  }
   case 't':
   case 'T': {
     // Carregar textura.
@@ -354,10 +350,8 @@ int main(int argc, char **argv) {
   // Se um caminho de arquivo foi passado como argumento, carrega-o já no
   // início, aplicando o mesmo pós-processamento do carregamento manual.
   if (argc > 1) {
-    if (load_stl(argv[1])) {
-      orient_model();
+    if (load_model(argv[1])) {
       center_model();
-      generate_uv_coords();
       printf("Modelo carregado: %s (%zu triangulos)\n", argv[1],
              g_triangles.size());
     }
