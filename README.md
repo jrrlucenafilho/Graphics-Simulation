@@ -174,21 +174,21 @@ Graphics-Simulation/
 
 ---
 
-## Os elementos de cada atividade prática
+## Elementos de cada atividade prática
 
-- **Atividade Prática 2 — Movimentação de objetos e uso da pilha**: rotação e zoom da cena via mouse; arrasto das lâmpadas em 3D; escala não uniforme do modelo com matrizes de transformação (`glScalef` na pilha, ajustada pelas teclas de eixo `X/x`, `Y/y`, `Z/z` no modo de escala); uso de `glPushMatrix`/`glPopMatrix` para desenhar lâmpadas, gizmos de eixos e a UI 2D sem afetar as transformações da cena.
-- **Atividade Prática 3 — Uso correto de Oclusão**: depth test (`GL_DEPTH_TEST`) habilitado para a cena 3D, com controle explícito de depth mask ao desenhar elementos de interface (botões, indicador de eixos).
-- **Atividade Prática 4 — Fontes de luz com comportamento correto**: duas luzes posicionais (`GL_LIGHT0`/`GL_LIGHT1`) com componentes difusa e especular, materiais com brilho (shininess), e reposicionamento interativo das luzes com atualização da iluminação em tempo real.
-- **Atividade Prática 5 — Utilização de imagens como texturas**: carregamento de imagens JPG/PNG com `stb_image`, geração de coordenadas UV por projeção planar da caixa envolvente e mapeamento da textura sobre o modelo combinado com a iluminação.
-- **Atividade Prática 6 — Utilização de Curvas**: trajetória de câmera do modo Showcase definida por segmentos de **curvas de Bézier cúbicas** — 8 pontos de controle formando um anel ao redor do modelo. As tangentes em cada ponto são estimadas a partir dos vizinhos e convertidas para os pontos de controle de Bézier (conversão de Hermite para Bézier), garantindo continuidade C1; a curva é avaliada e desenhada na cena.
+- **Atividade Prática 2 — Movimentação de objetos e uso da pilha**: transformação de objetos, matrizes e pilha de transformação.
+- **Atividade Prática 3 — Uso correto de Oclusão**: ocultação de superfícies (depth test) e interface 2D.
+- **Atividade Prática 4 — Fontes de luz com comportamento correto**: luzes, materiais e reposicionamento interativo.
+- **Atividade Prática 5 — Utilização de imagens como texturas**: texturização de modelos.
+- **Atividade Prática 6 — Utilização de Curvas**: curvas de Bézier no modo Showcase.
 
 ---
 
-## O que cada integrante fez
+## Contribuições por integrante
 
 
 | Integrante | Contribuições |
 |---|---|
-| José Ricardo Rodrigues | |
-| Ana Vitória | |
-| Leomax | |
+| José Ricardo Rodrigues | Iluminação, Importar, Exportar, Eixos  |
+| Ana Vitória |Translação, Rotação, Escala |
+| Leomax | Exportação, Escala |
