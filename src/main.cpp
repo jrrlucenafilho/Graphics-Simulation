@@ -256,6 +256,12 @@ static void motion(int x, int y) {
   glutPostRedisplay();
 }
 
+// Trata a liberação de teclas: limpa o eixo ativo ao soltar X/x, Y/y ou Z/z,
+// ocultando a linha de indicação do eixo em transformação.
+static void keyboard_up(unsigned char key, int, int) {
+  handle_transform_key_up(key);
+}
+
 // Trata o teclado: atalhos equivalentes aos botões (i=importar, e=exportar,
 // t=textura, s=showcase), ESC para sair, e as teclas de transformação
 // (1=translação, 2=rotação, 3=escala, R=restaurar, X/x Y/y Z/z no eixo do
@@ -351,6 +357,7 @@ int main(int argc, char **argv) {
   glutMotionFunc(motion);
   glutPassiveMotionFunc(motion); // hover dos botões sem botão pressionado
   glutKeyboardFunc(keyboard);
+  glutKeyboardUpFunc(keyboard_up);
 
   // Se um caminho de arquivo foi passado como argumento, carrega-o já no
   // início, aplicando o mesmo pós-processamento do carregamento manual.

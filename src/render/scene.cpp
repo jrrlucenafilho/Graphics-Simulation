@@ -106,6 +106,46 @@ static void draw_axes_at(const Vec3 &pos) {
   glPopMatrix();
 }
 
+// Linha do eixo em transformação: desenhada somente enquanto uma tecla de eixo
+// (X/x, Y/y ou Z/z) está pressionada e alterando o modelo. Uma linha longa e
+// fina ao longo do eixo ativo, na cor do eixo (X vermelho, Y verde, Z azul),
+// partindo da posição atual do modelo e alinhada com os eixos globais (sem a
+// rotação do modelo).
+static void draw_active_axis_line() {
+  if (g_active_axis < 0)
+    return;
+
+  glPushMatrix();
+  glTranslatef(g_translate_x, g_translate_y, g_translate_z);
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+
+  float len = 10.0f;
+  glLineWidth(1.0f);
+  if (g_active_axis == 0)
+    glColor3f(1, 0, 0);
+  else if (g_active_axis == 1)
+    glColor3f(0, 1, 0);
+  else
+    glColor3f(0, 0, 1);
+
+  glBegin(GL_LINES);
+  if (g_active_axis == 0) {
+    glVertex3f(-len, 0, 0);
+    glVertex3f(len, 0, 0);
+  } else if (g_active_axis == 1) {
+    glVertex3f(0, -len, 0);
+    glVertex3f(0, len, 0);
+  } else {
+    glVertex3f(0, 0, -len);
+    glVertex3f(0, 0, len);
+  }
+  glEnd();
+
+  glPopMatrix();
+}
+
 // Indicador de orientação no canto superior direito da tela: mostra os eixos
 // do mundo sempre alinhados com a rotação atual da câmera, para que o usuário
 // saiba em qual direção está olhando. Desenha em um viewport pequeno e depois
@@ -362,6 +402,10 @@ void render_scene() {
   }
 
   glPopMatrix();
+
+  // Linha do eixo em transformação (visível apenas enquanto a tecla de eixo
+  // estiver pressionada).
+  draw_active_axis_line();
 
   // No modo vitrine, desenha a curva por onde a câmera está percorrendo.
   if (g_showcase_active) {

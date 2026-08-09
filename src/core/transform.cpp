@@ -7,6 +7,10 @@ float g_model_rot_x = 0.0f, g_model_rot_y = 0.0f, g_model_rot_z = 0.0f;
 float g_scale_x = 1.0f, g_scale_y = 1.0f, g_scale_z = 1.0f;
 TransformMode g_transform_mode = TRANSFORM_TRANSLATE;
 
+// Eixo que está sendo transformado enquanto uma tecla de eixo está pressionada
+// (-1 = nenhum, 0 = X, 1 = Y, 2 = Z).
+int g_active_axis = -1;
+
 #define TRANSLATE_STEP 0.10f
 #define ROTATE_STEP 5.0f
 #define SCALE_STEP 1.10f
@@ -76,9 +80,11 @@ static void apply_scale(float &axis_scale, float factor)
 }
 
 // Aplica uma transformação no eixo dado (0 = X, 1 = Y, 2 = Z) conforme o modo
-// ativo: translação desloca, rotação gira e escala estica/encolhe.
+// ativo: translação desloca, rotação gira e escala estica/encolhe. Também
+// marca o eixo como ativo enquanto a tecla estiver pressionada.
 static void apply_axis(int axis, float direction)
 {
+  g_active_axis = axis;
   if (g_transform_mode == TRANSFORM_TRANSLATE)
   {
     float delta = TRANSLATE_STEP * direction;
@@ -149,18 +155,22 @@ bool handle_transform_key(unsigned char key)
   {
   case '1':
     g_transform_mode = TRANSFORM_TRANSLATE;
+    g_active_axis = -1;
     request_redraw();
     return true;
   case '2':
     g_transform_mode = TRANSFORM_ROTATE;
+    g_active_axis = -1;
     request_redraw();
     return true;
   case '3':
     g_transform_mode = TRANSFORM_SCALE;
+    g_active_axis = -1;
     request_redraw();
     return true;
   case 'r':
   case 'R':
+    g_active_axis = -1;
     reset_model_transform();
     return true;
 
@@ -187,6 +197,31 @@ bool handle_transform_key(unsigned char key)
     return true;
   }
   return false;
+}
+
+// Chamado ao soltar uma tecla de eixo: limpa o eixo ativo para a linha de
+// indicação desaparecer quando a tecla deixar de ser pressionada.
+bool handle_transform_key_up(unsigned char key)
+{
+  switch (key)
+  {
+  case 'X':
+  case 'x':
+    g_active_axis = -1;
+    break;
+  case 'Y':
+  case 'y':
+    g_active_axis = -1;
+    break;
+  case 'Z':
+  case 'z':
+    g_active_axis = -1;
+    break;
+  default:
+    return false;
+  }
+  glutPostRedisplay();
+  return true;
 }
 
 void apply_model_transform()
