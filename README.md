@@ -21,10 +21,6 @@ O programa é um **visualizador 3D de modelos STL/OBJ** escrito em C++ com **Ope
 
 ## Imagens do programa
 
-<!-- Substitua os placeholders abaixo por capturas de tela ou GIFs do programa em execução.
-     Sugestão: salve as imagens em uma pasta docs/ e ajuste os caminhos.
-     Imagens ainda a adicionar: modelo com textura (textura.png) e lâmpadas com gizmo (luzes.png). -->
-
 **Visão geral:**
 
 ![Visão geral](/docs/visao_geral.gif)
@@ -32,6 +28,26 @@ O programa é um **visualizador 3D de modelos STL/OBJ** escrito em C++ com **Ope
 **Modo Showcase (câmera percorrendo a trajetória de Bézier):**
 
 ![Showcase](/docs/showcase.gif)
+
+**Movimentação de Luzes:**
+
+![Luzes](/docs/lights.gif)
+
+**Rotação em Eixo:**
+
+![Rotação](/docs/rotation.gif)
+
+**Mudança de Escala em Eixo:**
+
+![Mudança de Escala](/docs/scale.gif)
+
+**Translação em Eixo:**
+
+![Translação](/docs/showcase.gif)
+
+**Aplicação de Textura:**
+
+![Textura](/docs/texture.gif)
 
 ---
 
