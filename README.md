@@ -189,6 +189,6 @@ Graphics-Simulation/
 
 | Integrante | Contribuições |
 |---|---|
-| José Ricardo Rodrigues | Iluminação, Importar, Exportar, Eixos  |
-| Ana Vitória |Translação, Rotação, Escala |
+| José Ricardo Rodrigues | Iluminação, Importar, Exportar, Eixos, Splines  |
+| Ana Vitória |Translação, Rotação, Escala, Eixos |
 | Leomax | Exportação, Escala |
