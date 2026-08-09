@@ -1,8 +1,8 @@
-#ifndef STL_IO_H
-#define STL_IO_H
+#ifndef STL_IO_HPP
+#define STL_IO_HPP
 
 #include <string>
-#include "core/common.h"
+#include "core/common.hpp"
 
 bool load_stl(const std::string &path);
 bool export_stl_ascii(const std::string &path);

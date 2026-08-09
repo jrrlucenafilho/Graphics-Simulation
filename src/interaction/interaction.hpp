@@ -1,7 +1,7 @@
-#ifndef INTERACTION_H
-#define INTERACTION_H
+#ifndef INTERACTION_HPP
+#define INTERACTION_HPP
 
-#include "core/common.h"
+#include "core/common.hpp"
 
 int pick_triangle(int mx, int my);
 int pick_lamp(int mx, int my);

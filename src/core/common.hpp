@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef COMMON_HPP
+#define COMMON_HPP
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>

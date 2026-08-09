@@ -1,5 +1,5 @@
-#include "ui.h"
-#include "core/transform.h"
+#include "ui.hpp"
+#include "core/transform.hpp"
 #include <cstdio>
 #include <cstring>
 

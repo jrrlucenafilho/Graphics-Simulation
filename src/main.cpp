@@ -1,10 +1,10 @@
-#include "core/common.h"
-#include "core/transform.h"
-#include "io/file_dialog.h"
-#include "interaction/interaction.h"
-#include "render/scene.h"
-#include "io/stl_io.h"
-#include "io/texture.h"
+#include "core/common.hpp"
+#include "core/transform.hpp"
+#include "io/file_dialog.hpp"
+#include "interaction/interaction.hpp"
+#include "render/scene.hpp"
+#include "io/stl_io.hpp"
+#include "io/texture.hpp"
 #include <cstdio>
 #include <cstdlib>
 

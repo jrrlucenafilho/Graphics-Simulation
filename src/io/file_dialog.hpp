@@ -1,5 +1,5 @@
-#ifndef FILE_DIALOG_H
-#define FILE_DIALOG_H
+#ifndef FILE_DIALOG_HPP
+#define FILE_DIALOG_HPP
 
 #include <string>
 

@@ -1,7 +1,7 @@
-#include "scene.h"
-#include "core/common.h"
-#include "core/transform.h"
-#include "ui.h"
+#include "scene.hpp"
+#include "core/common.hpp"
+#include "core/transform.hpp"
+#include "ui.hpp"
 #include <cstdio>
 
 static void draw_grid_floor()

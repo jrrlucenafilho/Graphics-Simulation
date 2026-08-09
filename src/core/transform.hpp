@@ -1,7 +1,7 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef TRANSFORM_HPP
+#define TRANSFORM_HPP
 
-#include "core/common.h"
+#include "core/common.hpp"
 
 // Modos de edição do modelo. As teclas especiais (setas e Page Up/Down)
 // executam uma transformação diferente conforme o modo selecionado.

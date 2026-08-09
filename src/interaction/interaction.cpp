@@ -1,5 +1,5 @@
-#include "interaction.h"
-#include "core/transform.h"
+#include "interaction.hpp"
+#include "core/transform.hpp"
 #include <cmath>
 
 static bool ray_triangle_intersect(const Vec3 &orig, const Vec3 &dir,

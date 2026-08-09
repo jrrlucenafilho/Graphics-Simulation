@@ -146,18 +146,18 @@ Graphics-Simulation/
 ├── src/
 │   ├── main.cpp                     # Entry point + GLUT callbacks
 │   ├── core/
-│   │   ├── common.h                 # Vec3, Vec2, Triangle + globals
-│   │   └── transform.h/cpp          # Escala não uniforme (esticar por eixo)
+│   │   ├── common.hpp                 # Vec3, Vec2, Triangle + globals
+│   │   └── transform.hpp/cpp          # Escala não uniforme (esticar por eixo)
 │   ├── io/                          # Operações de entrada/saída
-│   │   ├── file_dialog.h/cpp        # Janelas de diálogo (zenity)
-│   │   ├── stl_io.h/cpp             # Load/save STL, centralizar, UV
-│   │   ├── texture.h/cpp            # Carregamento de texturas
+│   │   ├── file_dialog.hpp/cpp        # Janelas de diálogo (zenity)
+│   │   ├── stl_io.hpp/cpp             # Load/save STL, centralizar, UV
+│   │   ├── texture.hpp/cpp            # Carregamento de texturas
 │   │   └── stb_image.h              # Biblioteca de imagens
 │   ├── render/                      # Renderização
-│   │   ├── scene.h/cpp              # Cena 3D (grid, luzes, eixos, spline)
-│   │   └── ui.h/cpp                 # Interface 2D (botões, paleta)
+│   │   ├── scene.hpp/cpp              # Cena 3D (grid, luzes, eixos, spline)
+│   │   └── ui.hpp/cpp                 # Interface 2D (botões, paleta)
 │   └── interaction/                 # Interação do usuário
-│       └── interaction.h/cpp        # Ray picking, arrastar lâmpadas
+│       └── interaction.hpp/cpp        # Ray picking, arrastar lâmpadas
 ├── build/                           # Objetos compilados (gerado)
 ├── models/                          # Modelos STL de exemplo
 ├── textures/                        # Imagens de textura de exemplo
