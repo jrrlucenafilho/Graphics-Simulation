@@ -4,7 +4,6 @@
 // Módulo de carregamento de texturas 2D (imagens) usando stb_image,
 // integradas ao OpenGL como textura de mapeamento da malha do modelo.
 
-#include "core/common.hpp"
 #include <string>
 
 // Carrega a imagem do caminho informado como textura GL e a torna ativa.

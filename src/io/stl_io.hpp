@@ -5,7 +5,6 @@
 // malha (centralização, orientação e geração de coordenadas de textura).
 
 #include <string>
-#include "core/common.hpp"
 
 // Carrega um arquivo STL (ASCII ou binário) para g_triangles.
 // Retorna true em caso de sucesso. Não centraliza nem orienta o modelo;

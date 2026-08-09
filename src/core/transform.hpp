@@ -1,7 +1,7 @@
 #ifndef TRANSFORM_HPP
 #define TRANSFORM_HPP
 
-#include "core/common.hpp"
+#include "common.hpp"
 
 // Modos de edição do modelo. As teclas X, Y e Z executam uma transformação
 // diferente no eixo correspondente conforme o modo selecionado.

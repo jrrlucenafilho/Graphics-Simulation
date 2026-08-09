@@ -122,7 +122,7 @@ static void draw_active_axis_line() {
   glDisable(GL_TEXTURE_2D);
 
   float len = 10.0f;
-  glLineWidth(1.0f);
+  glLineWidth(2.0f);
   if (g_active_axis == 0)
     glColor3f(1, 0, 0);
   else if (g_active_axis == 1)

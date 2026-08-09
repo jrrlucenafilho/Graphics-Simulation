@@ -4,7 +4,7 @@
 // Módulo de interação com o mouse: converte coordenadas de tela em informações
 // do mundo 3D (projeção/unprojeção) para seleção e arraste de objetos da cena.
 
-#include "core/common.hpp"
+#include "../core/common.hpp"
 
 // Identifica qual lâmpada está sob o cursor (por proximidade na tela).
 // Retorna o índice em g_lamp_positions ou -1 se nenhuma for alcançada.
