@@ -70,7 +70,8 @@ void draw_info_text() {
   char line1[256];
   char line2[256];
   const char *line3 =
-      "1: mover | 2: girar | 3: esticar | Setas: X/Y | PgUp/PgDn: Z | R: reset";
+      "1: mover | 2: girar | 3: esticar | X/Y/Z: eixo do modo (maiscula +, "
+      "minuscula -) | R: reset";
 
   if (g_model_loaded) {
     snprintf(line1, sizeof(line1), "Triangulos: %zu | Modo: %s",

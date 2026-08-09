@@ -256,17 +256,10 @@ static void motion(int x, int y) {
   glutPostRedisplay();
 }
 
-// Trata teclas especiais: as setas e Page Up/Page Down alteram o eixo
-// correspondente no modo de transformação ativo (translação, rotação ou
-// escala), definido pelas teclas 1/2/3.
-static void special_keys(int key, int, int) {
-  handle_transform_special_key(key);
-}
-
 // Trata o teclado: atalhos equivalentes aos botões (i=importar, e=exportar,
 // t=textura, s=showcase), ESC para sair, e as teclas de transformação
-// (1=translação, 2=rotação, 3=escala, R=restaurar, X/x Y/y Z/z de escala)
-// tratadas pelo módulo de transformação.
+// (1=translação, 2=rotação, 3=escala, R=restaurar, X/x Y/y Z/z no eixo do
+// modo ativo) tratadas pelo módulo de transformação.
 static void keyboard(unsigned char key, int, int) {
   if (handle_transform_key(key))
     return;
@@ -358,7 +351,6 @@ int main(int argc, char **argv) {
   glutMotionFunc(motion);
   glutPassiveMotionFunc(motion); // hover dos botões sem botão pressionado
   glutKeyboardFunc(keyboard);
-  glutSpecialFunc(special_keys);
 
   // Se um caminho de arquivo foi passado como argumento, carrega-o já no
   // início, aplicando o mesmo pós-processamento do carregamento manual.

@@ -3,8 +3,8 @@
 
 #include "core/common.hpp"
 
-// Modos de edição do modelo. As teclas especiais (setas e Page Up/Down)
-// executam uma transformação diferente conforme o modo selecionado.
+// Modos de edição do modelo. As teclas X, Y e Z executam uma transformação
+// diferente no eixo correspondente conforme o modo selecionado.
 enum TransformMode
 {
     TRANSFORM_TRANSLATE,
@@ -19,11 +19,9 @@ extern TransformMode g_transform_mode;
 
 // Teclas comuns:
 // 1 = translação, 2 = rotação, 3 = escala, R = restaurar.
-// X/x, Y/y e Z/z continuam esticando/encolhendo diretamente por eixo.
+// X/x, Y/y e Z/z ajustam o eixo correspondente no modo atual (maiúscula no
+// sentido positivo, minúscula no negativo).
 bool handle_transform_key(unsigned char key);
-
-// Setas alteram X/Y e Page Up/Page Down alteram Z no modo atual.
-bool handle_transform_special_key(int key);
 
 // Aplica a transformação exclusiva do modelo na matriz MODELVIEW atual.
 void apply_model_transform();

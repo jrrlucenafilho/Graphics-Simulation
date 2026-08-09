@@ -75,6 +75,43 @@ static void apply_scale(float &axis_scale, float factor)
   request_redraw();
 }
 
+// Aplica uma transformação no eixo dado (0 = X, 1 = Y, 2 = Z) conforme o modo
+// ativo: translação desloca, rotação gira e escala estica/encolhe.
+static void apply_axis(int axis, float direction)
+{
+  if (g_transform_mode == TRANSFORM_TRANSLATE)
+  {
+    float delta = TRANSLATE_STEP * direction;
+    if (axis == 0)
+      g_translate_x += delta;
+    else if (axis == 1)
+      g_translate_y += delta;
+    else
+      g_translate_z += delta;
+  }
+  else if (g_transform_mode == TRANSFORM_ROTATE)
+  {
+    float delta = ROTATE_STEP * direction;
+    if (axis == 0)
+      g_model_rot_x = normalize_angle(g_model_rot_x + delta);
+    else if (axis == 1)
+      g_model_rot_y = normalize_angle(g_model_rot_y + delta);
+    else
+      g_model_rot_z = normalize_angle(g_model_rot_z + delta);
+  }
+  else
+  {
+    float factor = direction > 0.0f ? SCALE_STEP : 1.0f / SCALE_STEP;
+    if (axis == 0)
+      apply_scale(g_scale_x, factor);
+    else if (axis == 1)
+      apply_scale(g_scale_y, factor);
+    else
+      apply_scale(g_scale_z, factor);
+  }
+  request_redraw();
+}
+
 const char *transform_mode_name()
 {
   switch (g_transform_mode)
@@ -127,98 +164,29 @@ bool handle_transform_key(unsigned char key)
     reset_model_transform();
     return true;
 
-  // Atalhos de escala já existentes no projeto.
+  // As teclas de eixo executam a ação do modo atual (translação, rotação ou
+  // escala) sobre o eixo correspondente. Maiúsculas vão no sentido positivo,
+  // minúsculas no sentido negativo.
   case 'X':
-    apply_scale(g_scale_x, SCALE_STEP);
+    apply_axis(0, 1.0f);
     return true;
   case 'x':
-    apply_scale(g_scale_x, 1.0f / SCALE_STEP);
+    apply_axis(0, -1.0f);
     return true;
   case 'Y':
-    apply_scale(g_scale_y, SCALE_STEP);
+    apply_axis(1, 1.0f);
     return true;
   case 'y':
-    apply_scale(g_scale_y, 1.0f / SCALE_STEP);
+    apply_axis(1, -1.0f);
     return true;
   case 'Z':
-    apply_scale(g_scale_z, SCALE_STEP);
+    apply_axis(2, 1.0f);
     return true;
   case 'z':
-    apply_scale(g_scale_z, 1.0f / SCALE_STEP);
+    apply_axis(2, -1.0f);
     return true;
   }
   return false;
-}
-
-bool handle_transform_special_key(int key)
-{
-  float direction = 0.0f;
-  int axis = -1; // 0 = X, 1 = Y, 2 = Z
-
-  switch (key)
-  {
-  case GLUT_KEY_LEFT:
-    axis = 0;
-    direction = -1.0f;
-    break;
-  case GLUT_KEY_RIGHT:
-    axis = 0;
-    direction = 1.0f;
-    break;
-  case GLUT_KEY_DOWN:
-    axis = 1;
-    direction = -1.0f;
-    break;
-  case GLUT_KEY_UP:
-    axis = 1;
-    direction = 1.0f;
-    break;
-  case GLUT_KEY_PAGE_DOWN:
-    axis = 2;
-    direction = -1.0f;
-    break;
-  case GLUT_KEY_PAGE_UP:
-    axis = 2;
-    direction = 1.0f;
-    break;
-  default:
-    return false;
-  }
-
-  if (g_transform_mode == TRANSFORM_TRANSLATE)
-  {
-    float delta = TRANSLATE_STEP * direction;
-    if (axis == 0)
-      g_translate_x += delta;
-    else if (axis == 1)
-      g_translate_y += delta;
-    else
-      g_translate_z += delta;
-  }
-  else if (g_transform_mode == TRANSFORM_ROTATE)
-  {
-    float delta = ROTATE_STEP * direction;
-    if (axis == 0)
-      g_model_rot_x = normalize_angle(g_model_rot_x + delta);
-    else if (axis == 1)
-      g_model_rot_y = normalize_angle(g_model_rot_y + delta);
-    else
-      g_model_rot_z = normalize_angle(g_model_rot_z + delta);
-  }
-  else
-  {
-    float factor = direction > 0.0f ? SCALE_STEP : 1.0f / SCALE_STEP;
-    if (axis == 0)
-      apply_scale(g_scale_x, factor);
-    else if (axis == 1)
-      apply_scale(g_scale_y, factor);
-    else
-      apply_scale(g_scale_z, factor);
-    return true;
-  }
-
-  request_redraw();
-  return true;
 }
 
 void apply_model_transform()
