@@ -24,8 +24,9 @@ int pick_lamp(int mx, int my) {
       continue;
     // Distância euclidiana na tela (lembrando que a origem da tela em Y é
     // invertida em relação ao OpenGL).
-    float d = sqrtf((mx - sx) * (mx - sx) +
-                    ((viewport[3] - my) - sy) * ((viewport[3] - my) - sy));
+    float dx = (float)mx - (float)sx;
+    float dy = (float)(viewport[3] - my) - (float)sy;
+    float d = std::sqrt(dx * dx + dy * dy);
     if (d < best_dist) {
       best_dist = d;
       best_idx = (int)i;
@@ -40,7 +41,7 @@ int pick_lamp(int mx, int my) {
 Vec3 get_view_direction() {
   GLdouble mv[16];
   glGetDoublev(GL_MODELVIEW_MATRIX, mv);
-  Vec3 d(-mv[2], -mv[6], -mv[10]);
+  Vec3 d(-(float)mv[2], -(float)mv[6], -(float)mv[10]);
   d.normalize();
   return d;
 }
@@ -63,13 +64,15 @@ Vec3 mouse_to_3d_plane(int mx, int my, const Vec3 &plane_normal,
   gluUnProject(mx, viewport[3] - my, 0.0, mv, proj, viewport, &nx, &ny, &nz);
   gluUnProject(mx, viewport[3] - my, 1.0, mv, proj, viewport, &fx, &fy, &fz);
 
-  Vec3 orig(nx, ny, nz);
-  Vec3 dir(fx - nx, fy - ny, fz - nz);
+  // gluUnProject devolve doubles; os valores são convertidos para float ao
+  // montar os vetores de trabalho da interseção.
+  Vec3 orig((float)nx, (float)ny, (float)nz);
+  Vec3 dir((float)(fx - nx), (float)(fy - ny), (float)(fz - nz));
   dir.normalize();
 
   // Interseção raio-plano: t = (pt - orig) . normal / (dir . normal).
   float denom = dir.dot(plane_normal);
-  if (fabs(denom) < 1e-6f)
+  if (std::abs(denom) < 1e-6f)
     return plane_pt;
   float d = (plane_pt - orig).dot(plane_normal) / denom;
   return orig + dir * d;

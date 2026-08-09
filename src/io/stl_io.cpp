@@ -42,9 +42,12 @@ static bool load_stl_ascii(const std::string &path) {
     if (trim.substr(0, 12) == "facet normal" || trim.substr(0, 5) == "facet") {
       Triangle tri;
       tri.normal = Vec3(0, 0, 0);
-      if (trim.substr(0, 12) == "facet normal")
-        sscanf(trim.c_str(), "facet normal %f %f %f", &tri.normal.x,
-               &tri.normal.y, &tri.normal.z);
+      if (trim.substr(0, 12) == "facet normal") {
+        std::stringstream ss(trim);
+        std::string tok;
+        ss >> tok >> tok;  // descarta "facet normal"
+        ss >> tri.normal.x >> tri.normal.y >> tri.normal.z;
+      }
       int vi = 0;
       while (std::getline(f, line) && vi < 3) {
         std::string t;
@@ -55,8 +58,10 @@ static bool load_stl_ascii(const std::string &path) {
           t.push_back(c);
         }
         if (t.find("vertex") != std::string::npos) {
-          sscanf(t.c_str(), "vertex %f %f %f", &tri.v[vi].x, &tri.v[vi].y,
-                 &tri.v[vi].z);
+          std::stringstream ss(t);
+          std::string tok;
+          ss >> tok;  // descarta "vertex"
+          ss >> tri.v[vi].x >> tri.v[vi].y >> tri.v[vi].z;
           vi++;
         }
       }
@@ -79,15 +84,15 @@ static bool load_stl_binary(const std::string &path) {
   char header[80];
   f.read(header, 80);
   unsigned int count = 0;
-  f.read((char *)&count, 4);
+  f.read(reinterpret_cast<char *>(&count), 4);
   for (unsigned int i = 0; i < count; i++) {
     Triangle tri;
-    f.read((char *)&tri.normal, sizeof(float) * 3);
-    f.read((char *)&tri.v[0], sizeof(float) * 3);
-    f.read((char *)&tri.v[1], sizeof(float) * 3);
-    f.read((char *)&tri.v[2], sizeof(float) * 3);
+    f.read(reinterpret_cast<char *>(&tri.normal), sizeof(float) * 3);
+    f.read(reinterpret_cast<char *>(&tri.v[0]), sizeof(float) * 3);
+    f.read(reinterpret_cast<char *>(&tri.v[1]), sizeof(float) * 3);
+    f.read(reinterpret_cast<char *>(&tri.v[2]), sizeof(float) * 3);
     unsigned short attr;
-    f.read((char *)&attr, 2);
+    f.read(reinterpret_cast<char *>(&attr), 2);
     g_triangles.push_back(tri);
     if (f.eof() || f.fail())
       break;
@@ -209,6 +214,15 @@ static std::string lower_extension(const std::string &p) {
   return e;
 }
 
+// Converte uma string em inteiro com verificação de sucesso (strtol): retorna
+// 0 quando nenhum dígito é encontrado, em vez de valor indefinido.
+static int parse_int(const std::string &s) {
+  const char *c = s.c_str();
+  char *end = nullptr;
+  long v = strtol(c, &end, 10);
+  return (end == c) ? 0 : (int)v;
+}
+
 // Lê um índice de face "v", "v/t", "v//n" ou "v/t/n". Retorna 0 quando a
 // parte correspondente não existe na face.
 static void parse_face_index(const std::string &comp, int &vi, int &ti,
@@ -216,18 +230,18 @@ static void parse_face_index(const std::string &comp, int &vi, int &ti,
   vi = ti = ni = 0;
   size_t p1 = comp.find('/');
   if (p1 == std::string::npos) {
-    vi = atoi(comp.c_str());
+    vi = parse_int(comp);
     return;
   }
-  vi = atoi(comp.substr(0, p1).c_str());
+  vi = parse_int(comp.substr(0, p1));
   size_t p2 = comp.find('/', p1 + 1);
   if (p2 == std::string::npos) {
-    ti = atoi(comp.substr(p1 + 1).c_str());
+    ti = parse_int(comp.substr(p1 + 1));
     return;
   }
   if (p2 > p1 + 1)
-    ti = atoi(comp.substr(p1 + 1, p2 - p1 - 1).c_str());
-  ni = atoi(comp.substr(p2 + 1).c_str());
+    ti = parse_int(comp.substr(p1 + 1, p2 - p1 - 1));
+  ni = parse_int(comp.substr(p2 + 1));
 }
 
 // Resolve um índice de vértice do OBJ (1-baseado ou negativo relativo) para

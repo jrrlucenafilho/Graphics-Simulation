@@ -48,6 +48,8 @@ bool handle_scale_key(unsigned char key) {
   case 'z':
     apply_scale(g_scale_z, 1.0f / SCALE_STEP);
     return true;
+  default:
+    break;
   }
   return false;
 }

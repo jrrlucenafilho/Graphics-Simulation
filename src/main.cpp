@@ -313,6 +313,8 @@ static void keyboard(unsigned char key, int, int) {
     break;
   case 27:
     exit(0); // ESC encerra a aplicação.
+  default:
+    break;
   }
 }
 
