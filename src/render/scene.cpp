@@ -1,6 +1,6 @@
 #include "scene.hpp"
-#include "core/common.hpp"
-#include "core/transform.hpp"
+#include "../core/common.hpp"
+#include "../core/transform.hpp"
 #include "ui.hpp"
 #include <cstdio>
 

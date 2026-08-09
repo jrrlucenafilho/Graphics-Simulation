@@ -1,4 +1,5 @@
 #include "stl_io.hpp"
+#include "../core/common.hpp"
 #include "texture.hpp"
 #include <algorithm>
 #include <cctype>

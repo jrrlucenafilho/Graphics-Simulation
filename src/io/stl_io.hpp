@@ -4,6 +4,7 @@
 // Módulo de leitura e escrita de arquivos STL, além do pós-processamento da
 // malha (centralização, orientação e geração de coordenadas de textura).
 
+#include "../core/common.hpp"
 #include <string>
 
 // Carrega um arquivo STL (ASCII ou binário) para g_triangles.
