@@ -170,7 +170,7 @@ Graphics-Simulation/
 - Melhorar a interface do usuário (por exemplo, feedback visual do modo ativo e organização das opções).
 - Permitir configurar pela interface a duração e o número de voltas da trajetória de Bézier do Showcase.
 - Otimizar a renderização de modelos grandes usando *vertex arrays*/VBOs em vez de `glBegin`/`glEnd` (modo imediato).
-- Reintroduzir a pintura de faces (removida na versão atual), com desfazer e salvamento das cores no arquivo exportado.
+- Introduzir a pintura de faces, com desfazer e salvamento das cores no arquivo exportado.
 
 ---
 
