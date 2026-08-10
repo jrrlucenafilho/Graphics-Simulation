@@ -234,29 +234,7 @@ static void draw_axes_indicator() {
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
-
-  // Desenha um retângulo em torno do indicador usando projeção ortográfica.
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0, g_win_w, 0, g_win_h, -1, 1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-
-  glColor3f(0.5f, 0.5f, 0.5f);
-  glBegin(GL_LINE_LOOP);
-  glVertex2i(vx, vy);
-  glVertex2i(vx + size, vy);
-  glVertex2i(vx + size, vy + size);
-  glVertex2i(vx, vy + size);
-  glEnd();
-
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-
+  
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
