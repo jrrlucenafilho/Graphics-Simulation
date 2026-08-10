@@ -2,6 +2,7 @@
 
 Projeto final da disciplina **Introdução à Computação Gráfica** (2026.1) — UFPB  
 Professor: Davi Santos
+Grupo: José Ricardo Rodrigues, Ana Vitória, Leomax
 
 ---
 
