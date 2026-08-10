@@ -6,7 +6,7 @@ Grupo: José Ricardo Rodrigues, Ana Vitória Maciel , Leomax Filho
 
 ---
 
-## O que o código faz
+## Código:
 
 O programa é um **visualizador 3D de modelos STL/OBJ** escrito em C++ com **OpenGL 2.1 + FreeGLUT**. Ele permite:
 
@@ -188,6 +188,7 @@ Graphics-Simulation/
 - Permitir configurar pela interface a duração e o número de voltas da trajetória de Bézier do Showcase.
 - Otimizar a renderização de modelos grandes usando *vertex arrays*/VBOs em vez de `glBegin`/`glEnd` (modo imediato).
 - Introduzir a pintura de faces, com desfazer e salvamento das cores no arquivo exportado.
+- Utilizar uma maneira menos custosa de desenhar o gizmo do top-right com os eixos.
 
 ---
 
